@@ -1,0 +1,31 @@
+{
+  "_meta": {
+    "source": "https://api.github.com/repos/ParadoxAi/pdfgen-python + raw pyproject.toml + https://pypi.org/pypi/pdfgen/json + https://pypi.org/pypi/pdfgen-python/json",
+    "captured_at": "2026-08-09",
+    "kind": "github-repo-metadata + pypi-negative-check",
+    "redactions": []
+  },
+  "body": {
+    "repo": "ParadoxAi/pdfgen-python",
+    "is_fork": true,
+    "parent": "shivanshs9/pdfgen-python",
+    "description_on_fork": "Python 3.6.1+ async wrapper for Pyppeteer to convert HTML to PDF.",
+    "created_at": "2022-08-26T03:53:54Z",
+    "pushed_at": "2026-04-13T17:41:26Z",
+    "language": "Python",
+    "branches": ["master", "dependabot/pip/pip-2d3ed43524"],
+    "pyproject_toml_unchanged": {
+      "name": "pdfgen",
+      "version": "2.0.2",
+      "authors": ["Shivansh Saini <shivanshs9@gmail.com>"],
+      "homepage": "https://github.com/shivanshs9/pdfgen-python"
+    },
+    "pypi_checks": {
+      "pdfgen-python": { "status": 404, "note": "confirmed by Discovery pre-Ingestion; re-verified here" },
+      "pdfgen": { "status": 200, "author": "Shivansh Saini <shivanshs9@gmail.com>", "note": "this IS a live PyPI package, but it is the ORIGINAL upstream author's own publish, unrelated to the Paradox fork -- the pyproject.toml in ParadoxAi's fork was never edited to rename/re-own the package before any hypothetical publish" }
+    }
+  },
+  "_decoded": {
+    "interpretation": "Paradox forked this small HTML-to-PDF wrapper, has an active dependabot branch (implying some internal use / dependency hygiene), but never renamed the package metadata or published it under their own name to any registry. Zero public registry footprint for this repo."
+  }
+}

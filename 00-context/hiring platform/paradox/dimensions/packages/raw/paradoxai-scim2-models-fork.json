@@ -1,0 +1,31 @@
+{
+  "_meta": {
+    "source": "https://api.github.com/repos/ParadoxAi/scim2-models + compare API",
+    "captured_at": "2026-08-09",
+    "kind": "github-repo-metadata + fork-diff",
+    "redactions": []
+  },
+  "body": {
+    "repo": "ParadoxAi/scim2-models",
+    "description": "SCIM resources serialization and validation with Pydantic",
+    "is_fork": true,
+    "parent": "python-scim/scim2-models",
+    "created_at": "2025-06-03T03:37:38Z",
+    "pushed_at": "2025-06-03T08:03:27Z",
+    "archived": false,
+    "language": "Python",
+    "compare_to_upstream_main": {
+      "status": "diverged",
+      "ahead_by": 2,
+      "behind_by": 192,
+      "commits": [
+        "feat: Adjust the PatchOp model",
+        "fix: CoreUser has no attribute 'manager' when validating mutability"
+      ]
+    },
+    "published_to_pypi_under_paradox_name": false
+  },
+  "_decoded": {
+    "interpretation": "A ~4.5-hour, single-session private patch of the upstream SCIM2 Pydantic models library, made once on 2025-06-03 and never touched again (192 commits behind current upstream). The two commit messages (PatchOp model adjustment; CoreUser.manager mutability fix) are consistent with adapting the library to a real internal SCIM provisioning use case (e.g. consuming/serving SCIM from an HRIS/ATS integration such as Workday or SAP SuccessFactors) rather than idle exploration. Never published as its own PyPI package -- confirms Paradox uses SCIM internally but is not a corroborating 'Paradox publishes scim2-models' finding as the recon plan hypothesis had it."
+  }
+}

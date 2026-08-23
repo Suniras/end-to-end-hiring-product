@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Frontline hiring, end to end</title>
+<meta name="description" content="Twenty steps from an application to somebody still on the floor at day ninety. Including the ones we never automate." />
+<meta name="color-scheme" content="light dark" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23245AE2'/%3E%3Cpath d='M16 8l8 8-8 8-8-8z' fill='white'/%3E%3C/svg%3E" />
+<link rel="stylesheet" href="assets/fonts.css" />
+<link rel="stylesheet" href="css/tokens.css" />
+<link rel="stylesheet" href="css/landing.css" />
+</head>
+<body class="lp">
+
+<!-- ============================================================ nav ==== -->
+<header class="lp-nav" id="nav">
+  <a class="brand" href="#top">
+    <span class="brand-mark" aria-hidden="true">
+      <svg viewBox="0 0 16 16" fill="none"><path d="M8 2.6l5.4 5.4L8 13.4 2.6 8z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+    </span>
+    <span class="brand-name">Frontline</span>
+  </a>
+  <nav class="lp-nav-links" aria-label="Sections">
+    <a href="#what">What it does</a>
+    <a href="#how">How it works</a>
+    <a href="#moments">The two moments</a>
+    <a href="#seats">Pick a seat</a>
+  </nav>
+  <div class="lp-nav-cta">
+    <button class="btn is-ghost is-sm" id="themeBtn" type="button" aria-label="Change theme">Auto</button>
+    <a class="btn is-primary" href="app.html#/deck">Open the demo <span aria-hidden="true">&rarr;</span></a>
+  </div>
+</header>
+
+<!-- =========================================================== hero ==== -->
+<section class="lp-hero" id="top">
+  <div class="lp-hero-copy">
+    <p class="eyebrow is-accent">For retailers who hire thousands of frontline staff a year</p>
+    <h1 class="display reveal" data-reveal>
+      <span>Twenty steps from</span>
+      <span>an application to</span>
+      <span><em class="ink-agent">somebody on the floor</em></span>
+      <span>at <em class="ink-good">day ninety</em>.</span>
+    </h1>
+    <p class="lp-sub">
+      An agent screens, chases and confirms. Deterministic rules do the parts a model would only make worse.
+      Legal clocks run where nobody can compress them.
+      <b>No candidate is ever rejected by software.</b>
+    </p>
+    <div class="lp-cta-row">
+      <a class="btn is-primary is-lg" href="app.html#/deck">Open the demo <span aria-hidden="true">&rarr;</span></a>
+      <a class="btn is-lg" href="#how">See how it works <span aria-hidden="true">&darr;</span></a>
+    </div>
+    <p class="lp-note">
+      Every external system is simulated and labelled as simulated. Nothing here is a real integration.
+    </p>
+  </div>
+
+  <!-- The hero visual is the product's actual claim: twenty steps, four owners,
+       one candidate travelling through them. -->
+  <div class="lp-hero-vis" aria-hidden="true">
+    <div class="lattice-wrap">
+      <svg class="lattice" id="lattice" viewBox="0 0 460 300" role="presentation"></svg>
+    </div>
+    <div class="ticker" id="ticker" aria-hidden="true"></div>
+  </div>
+</section>
+
+<!-- ====================================================== chainband ==== -->
+<section class="lp-chainband" id="chain">
+  <p class="eyebrow chain-eyebrow">Four owners, from an application to a person on the floor</p>
+  <div class="chain-card">
+    <div class="chain-rail" id="chainRail"></div>
+  </div>
+  <p class="chain-foot">
+    Most of a working hiring system is not a model. Nine of the twenty steps are plain deterministic software,
+    and three are waits nobody can shorten.
+  </p>
+</section>
+
+<!-- ==================================================== what it does ==== -->
+<section class="lp-what" id="what">
+  <div class="lp-what-copy">
+    <p class="eyebrow is-accent">What it does</p>
+    <h2 class="h-big">An HR team runs this across five systems. This runs all twenty steps.</h2>
+    <p class="lp-body">
+      A person applies on a Saturday night. Somebody has to screen them, book them, interview them, decide,
+      offer, chase the silence, order a check, wait on a county court, take an I-9, clear E-Verify, provision a
+      badge, place a first shift, and then notice on the Monday whether they turned up. Today that is a
+      recruiter, a store manager, a coordinator, an applicant tracking system, a payroll system and a
+      spreadsheet.
+    </p>
+    <p class="lp-body">
+      Both companies who sell into this market own the steps that happen inside their own product.
+      <em class="ink-agent">Neither owns the gaps between them</em>, and the gaps are where people disappear.
+    </p>
+  </div>
+  <div class="lp-stat-grid">
+    <div class="stat"><div class="stat-v" data-count="20">0</div><div class="stat-k">steps, hire to day ninety</div></div>
+    <div class="stat is-agent"><div class="stat-v" data-count="5">0</div><div class="stat-k">where a model earns its place</div></div>
+    <div class="stat"><div class="stat-v" data-count="9">0</div><div class="stat-k">plain deterministic software</div></div>
+    <div class="stat is-good"><div class="stat-v" data-count="6">0</div><div class="stat-k">sold by neither incumbent</div></div>
+  </div>
+</section>
+
+<!-- ==================================================== how it works ==== -->
+<section class="lp-how" id="how">
+  <div class="lp-how-head">
+    <p class="eyebrow is-accent">How it works</p>
+    <h2 class="h-big">Four stages. It shows its working at every one.</h2>
+    <p class="lp-body">
+      The agent handles conversation. Rules handle facts. A person handles judgement. The product's job is to
+      make sure nothing sits in a queue nobody is looking at.
+    </p>
+  </div>
+
+  <div class="how-pill-row"><div class="how-pill" id="howPill"></div></div>
+  <div class="how-cards" id="howCards"></div>
+
+  <p class="how-loop">
+    <span aria-hidden="true">&#8635;</span>
+    What actually happened becomes the baseline, because nobody publishes one.
+  </p>
+
+  <div class="how-tabs" id="howTabs" role="tablist" aria-label="Stages"></div>
+  <div class="how-play">
+    <button class="btn is-ghost is-sm" id="howToggle" type="button" aria-pressed="true">
+      <span id="howToggleLabel">Playing</span>
+    </button>
+  </div>
+</section>
+
+<!-- ================================================== the two moments ==== -->
+<section class="lp-moments" id="moments">
+  <div class="lp-how-head">
+    <p class="eyebrow is-accent">The two moments</p>
+    <h2 class="h-big">The parts nobody else catches.</h2>
+    <p class="lp-body">
+      Everything above is table stakes and we should be judged on it. These two are the reason to look twice.
+    </p>
+  </div>
+  <div class="moments-grid">
+    <article class="moment is-crit">
+      <p class="eyebrow">One</p>
+      <h3 class="h-mid">He scored 79. He is also not eligible for rehire.</h3>
+      <p class="lp-body">
+        Terminated for cause at another store in 2024. He spelled his name differently this time and every
+        contact detail is new. To a system that starts clean he is a brand-new applicant.
+      </p>
+      <p class="lp-body">
+        We caught him because when a retailer leaves their old system we import exactly one list. Everything
+        else can start from a cutover date. <em class="ink-crit">A do-not-hire list cannot.</em>
+      </p>
+      <div class="moment-kv">
+        <div><span class="k">Matched on</span><span class="v">SSN and date of birth</span></div>
+        <div><span class="k">Not matched on</span><span class="v">Name, address, phone, email</span></div>
+      </div>
+      <a class="lp-link" href="app.html#/flag">See the flag <span aria-hidden="true">&rarr;</span></a>
+    </article>
+
+    <article class="moment is-good">
+      <p class="eyebrow">Two</p>
+      <h3 class="h-mid">A mismatch is usually an admin error, and this is how retailers break the law by accident.</h3>
+      <p class="lp-body">
+        A new hire's E-Verify check comes back mismatched. She is a US citizen who hyphenated her surname after
+        marrying, and the government record still has the old one. She contests it, which she is entitled to do.
+      </p>
+      <p class="lp-body">
+        While she contests, nothing adverse is lawful. Not termination, not suspension, not delayed training,
+        and <em class="ink-good">not quietly leaving her off the rota</em>. Her store manager tried twice. The
+        product stopped him both times and told him why.
+      </p>
+      <div class="moment-kv">
+        <div><span class="k">Employee decision</span><span class="v">10 federal working days</span></div>
+        <div><span class="k">After referral</span><span class="v">8 federal working days</span></div>
+      </div>
+      <a class="lp-link" href="app.html#/compliance">See the compliance desk <span aria-hidden="true">&rarr;</span></a>
+    </article>
+  </div>
+</section>
+
+<!-- ========================================================== seats ==== -->
+<section class="lp-seats" id="seats">
+  <div class="lp-how-head">
+    <p class="eyebrow is-accent">Pick a seat</p>
+    <h2 class="h-big">See it from each chair.</h2>
+    <p class="lp-body">Two roles, the same twenty steps. Each opens on the screen that role actually works.</p>
+  </div>
+  <div class="seat-grid">
+    <a class="seat" href="app.html#/deck">
+      <span class="seat-mark">DW</span>
+      <span class="seat-name">Dana Whitfield</span>
+      <span class="seat-role">Field HR Manager</span>
+      <span class="seat-sub">Eighteen stores. Owns the hourly hiring process and has the volume.</span>
+      <span class="lp-link">Enter <span aria-hidden="true">&rarr;</span></span>
+    </a>
+    <a class="seat" href="app.html#/store">
+      <span class="seat-mark">MI</span>
+      <span class="seat-name">Marcus Iyer</span>
+      <span class="seat-role">Store Manager</span>
+      <span class="seat-sub">One store. Has the authority, and does not want a district dashboard.</span>
+      <span class="lp-link">Enter <span aria-hidden="true">&rarr;</span></span>
+    </a>
+    <a class="seat is-agent" href="app.html#/screening">
+      <span class="seat-mark is-agent">AR</span>
+      <span class="seat-name">Alicia Reyes</span>
+      <span class="seat-role">Cashier applicant</span>
+      <span class="seat-sub">Applied on a Saturday night. Screened three hours later. Still there at day ninety.</span>
+      <span class="lp-link">Follow her <span aria-hidden="true">&rarr;</span></span>
+    </a>
+  </div>
+
+  <div class="lp-final">
+    <div>
+      <h3 class="h-mid">See it run in about ten minutes.</h3>
+      <p class="lp-body">Ten scenes, presenter notes built in, and a reset so it always starts clean.</p>
+    </div>
+    <a class="btn is-primary is-lg" href="app.html#/deck">Open the demo <span aria-hidden="true">&rarr;</span></a>
+  </div>
+</section>
+
+<footer class="lp-foot">
+  <p>Internal demo. Sunfield Markets is invented and no real company appears in the data.
+     Every external system is simulated. Legal clocks are verified against primary government sources and
+     still need counsel sign-off before any build.</p>
+</footer>
+
+<script src="js/motion.js"></script>
+<script src="js/landing.js"></script>
+</body>
+</html>
