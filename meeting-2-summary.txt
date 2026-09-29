@@ -1,0 +1,50 @@
+# Product Scope and Target Market
+
+- Focus: end-to-end hiring system for large US retailers (2B+ revenue)
+- Primary pain: high-volume seasonal hiring (holiday season), slow handoffs, compliance burden
+- Target examples: Walmart, Target, Amazon, Flipkart, Reliance
+- Declining hire volumes (450K in 2022 → ~350K in 2023) not a blocker
+  - Driven by economic pressure and tighter compliance rules, not reduced need for the platform
+- Core value prop: handle 4,000 hires in 90 days with seamless step-to-step transitions
+
+# Hiring Funnel: 20-Step Framework
+
+- Skeleton of 20 steps reviewed and approved; no need to overthink
+- Priority: identify which steps are most critical and solve those first (top needle-movers in first 30–60 days)
+- Key distinction to map: which steps rely on existing systems vs. which are just email/phone communication
+- Step 0 and Step 20 (start/end): ensure no data loss or value drop-off between handoffs
+- Handoff pain is a core problem to solve across the funnel
+
+# Compliance, Connectors, and Edge Cases
+
+- Two main compliance requirements flagged: I-9 verification and e-verification
+  - Third-party tools (e.g., GreenLight) handle compliance checks; integrate via connector, not replacement
+- Strategy: build connectors to existing established systems rather than replacing them
+  - Retailers already have entrenched infrastructure; seamless integration is the sell
+- Workday used at Target for end-to-end HR (recruitment, training, appraisals, payroll); focus only on the hiring layer
+- Edge case: flagged candidates reapplying across different store locations
+  - Proposed solution: central candidate database with biometric or government ID matching
+  - Treat as exception-handling bucket; build a blacklist/whitelist knowledge base
+
+# Application Ingestion and ATS
+
+- Open question: how to capture new applications and migrate existing ones into the platform
+  - New applicants: direct connector from job portals to the app
+  - Existing applications: need to understand how Target’s central HQ database is structured
+- Outsourcing hiring to third parties is expensive; most large retailers keep it in-house
+  - Worth researching: what % of hiring is outsourced, and what third-party candidate pools look like
+  - Opportunity: plug into a pre-screened third-party candidate pool at the shortlisting stage
+
+# Research Plan and Next Steps
+
+- Colleague outreach at Target to validate ground-level hiring process and steps
+- Questions to send ahead of those conversations (Suniras to share a list)
+- If colleague outreach yields nothing substantial: run a second validation conversation with a domain expert before wireframing
+- Timeline: 3–4 days for research lock, then move to wireframes → build phase
+
+# Next Steps
+
+- **Send list of open research questions** (Suniras)
+- **Reach out to Target colleagues on hiring cycle details**
+- **Continue secondary research on outsourcing and ATS ingestion** (Suniras)
+- **Finalize research and begin wireframes by Friday 21st August or Monday 24th August**

@@ -1,0 +1,281 @@
+{
+  "_meta": {
+    "source": "https://status.paradox.ai/api/v2/incidents.json",
+    "captured_at": "2026-08-09",
+    "kind": "statuspage-incidents",
+    "count": 45,
+    "redactions": []
+  },
+  "incidents": [
+    {
+      "name": "CEM Slowness",
+      "created_at": "2026-07-15",
+      "impact": "minor",
+      "status": "postmortem"
+    },
+    {
+      "name": "CEM Slowness",
+      "created_at": "2026-07-10",
+      "impact": "minor",
+      "status": "postmortem"
+    },
+    {
+      "name": "CEM Slowness",
+      "created_at": "2026-07-09",
+      "impact": "minor",
+      "status": "postmortem"
+    },
+    {
+      "name": "CEM Slowness",
+      "created_at": "2026-07-01",
+      "impact": "minor",
+      "status": "postmortem"
+    },
+    {
+      "name": "Issue with Browser Extension",
+      "created_at": "2026-06-17",
+      "impact": "minor",
+      "status": "resolved"
+    },
+    {
+      "name": "Production Instances Unavailable",
+      "created_at": "2026-06-04",
+      "impact": "critical",
+      "status": "resolved"
+    },
+    {
+      "name": "CEM Unavailable",
+      "created_at": "2026-04-17",
+      "impact": "none",
+      "status": "resolved"
+    },
+    {
+      "name": "Cem Slowness",
+      "created_at": "2026-01-12",
+      "impact": "minor",
+      "status": "resolved"
+    },
+    {
+      "name": "Potential Chat Response Delay",
+      "created_at": "2025-12-11",
+      "impact": "minor",
+      "status": "resolved"
+    },
+    {
+      "name": "General Service Slowness",
+      "created_at": "2025-10-20",
+      "impact": "major",
+      "status": "resolved"
+    },
+    {
+      "name": "CEM Performance Impacted",
+      "created_at": "2025-08-26",
+      "impact": "minor",
+      "status": "resolved"
+    },
+    {
+      "name": "CEM access issues from Comcast",
+      "created_at": "2025-06-25",
+      "impact": "minor",
+      "status": "resolved"
+    },
+    {
+      "name": "CEM Performance impacted",
+      "created_at": "2025-06-09",
+      "impact": "minor",
+      "status": "resolved"
+    },
+    {
+      "name": "Intermittent Availability Issues",
+      "created_at": "2024-09-06",
+      "impact": "minor",
+      "status": "resolved"
+    },
+    {
+      "name": "I-9 errors for Gryphon users",
+      "created_at": "2024-08-19",
+      "impact": "minor",
+      "status": "resolved"
+    },
+    {
+      "name": "CEM Slowness",
+      "created_at": "2024-08-19",
+      "impact": "minor",
+      "status": "resolved"
+    },
+    {
+      "name": "CEM Slowness",
+      "created_at": "2024-08-07",
+      "impact": "minor",
+      "status": "resolved"
+    },
+    {
+      "name": "CEM Performance impacted",
+      "created_at": "2024-08-02",
+      "impact": "major",
+      "status": "resolved"
+    },
+    {
+      "name": "Storage Optimization Event",
+      "created_at": "2024-07-10",
+      "impact": "minor",
+      "status": "resolved"
+    },
+    {
+      "name": "Olivia Availability Issue",
+      "created_at": "2024-04-23",
+      "impact": "critical",
+      "status": "resolved"
+    },
+    {
+      "name": "WhatsApp messages not being delivered",
+      "created_at": "2024-04-22",
+      "impact": "minor",
+      "status": "resolved"
+    },
+    {
+      "name": "CEM availability issue",
+      "created_at": "2024-01-09",
+      "impact": "major",
+      "status": "resolved"
+    },
+    {
+      "name": "Reduced Availability for CEM Components",
+      "created_at": "2023-12-12",
+      "impact": "minor",
+      "status": "resolved"
+    },
+    {
+      "name": "Delayed account activity and status updates",
+      "created_at": "2023-10-18",
+      "impact": "minor",
+      "status": "resolved"
+    },
+    {
+      "name": "Issues viewing candidates in the CEM Inbox",
+      "created_at": "2023-09-11",
+      "impact": "minor",
+      "status": "resolved"
+    },
+    {
+      "name": "Degraded performance on CEM",
+      "created_at": "2023-08-28",
+      "impact": "minor",
+      "status": "resolved"
+    },
+    {
+      "name": "Delays sending whatsapp Messages",
+      "created_at": "2023-07-25",
+      "impact": "minor",
+      "status": "resolved"
+    },
+    {
+      "name": "Increased error rates",
+      "created_at": "2023-07-19",
+      "impact": "minor",
+      "status": "resolved"
+    },
+    {
+      "name": "CEM Outage",
+      "created_at": "2023-07-12",
+      "impact": "minor",
+      "status": "resolved"
+    },
+    {
+      "name": "WhatsApp messages not being processed",
+      "created_at": "2023-06-14",
+      "impact": "minor",
+      "status": "resolved"
+    },
+    {
+      "name": "Service disruption impacting SMS delivery",
+      "created_at": "2023-06-13",
+      "impact": "major",
+      "status": "resolved"
+    },
+    {
+      "name": "Responsiveness impacted on the API and CEM",
+      "created_at": "2023-06-05",
+      "impact": "minor",
+      "status": "resolved"
+    },
+    {
+      "name": "Degraded Latency and Timeout Message",
+      "created_at": "2022-11-29",
+      "impact": "minor",
+      "status": "resolved"
+    },
+    {
+      "name": "Elevated Latency",
+      "created_at": "2022-07-19",
+      "impact": "minor",
+      "status": "resolved"
+    },
+    {
+      "name": "Paradox Outage",
+      "created_at": "2022-05-23",
+      "impact": "critical",
+      "status": "resolved"
+    },
+    {
+      "name": "Reporting Timeout",
+      "created_at": "2022-02-24",
+      "impact": "minor",
+      "status": "resolved"
+    },
+    {
+      "name": "Widget Not Rendering",
+      "created_at": "2022-02-21",
+      "impact": "major",
+      "status": "resolved"
+    },
+    {
+      "name": "Job Search Results",
+      "created_at": "2022-01-25",
+      "impact": "major",
+      "status": "resolved"
+    },
+    {
+      "name": "Elevated API Errors (AWS)",
+      "created_at": "2021-12-07",
+      "impact": "major",
+      "status": "resolved"
+    },
+    {
+      "name": "System Performance - NLP Failover",
+      "created_at": "2021-10-04",
+      "impact": "minor",
+      "status": "resolved"
+    },
+    {
+      "name": "Cache Performance",
+      "created_at": "2020-09-30",
+      "impact": "minor",
+      "status": "resolved"
+    },
+    {
+      "name": "Intermittent Unavailability",
+      "created_at": "2020-09-24",
+      "impact": "none",
+      "status": "resolved"
+    },
+    {
+      "name": "Not detecting open interview times on some users calendars",
+      "created_at": "2019-07-31",
+      "impact": "none",
+      "status": "resolved"
+    },
+    {
+      "name": "Issues responding to candidates and searching for candidates",
+      "created_at": "2017-11-29",
+      "impact": "none",
+      "status": "resolved"
+    },
+    {
+      "name": "Downtime due to AWS EC2, RDS, and Redshift Operational Issues",
+      "created_at": "2017-08-03",
+      "impact": "none",
+      "status": "resolved"
+    }
+  ]
+}

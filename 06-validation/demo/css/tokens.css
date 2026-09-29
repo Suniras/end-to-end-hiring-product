@@ -1,0 +1,261 @@
+/* ============================================================================
+   tokens.css
+   Colour, type and space tokens.
+
+   The colour tokens from --bg through --warn-soft are lifted verbatim from the
+   NuAnchor demo pack, which lifted them from the live product at
+   nuanchor.nustack.tech. Same names, same values, same three-state theming.
+   This demo is the same house design language, not an imitation of it.
+
+   Added here, and only where NuAnchor had no equivalent:
+     --crit / --crit-soft / --crit-line   a blocked or unlawful state
+     --clock / --clock-soft / --clock-line a wait nobody can compress
+     the space, radius, type and motion scales
+
+   OWNER ENCODING, which is the whole idea.
+   Every one of the twenty funnel steps is owned by exactly one of four things,
+   and each gets its own hue. The categories come straight from
+   05-strategy/automation-breakdown.md, so the colour system is the analysis.
+
+     --agent   purple   an AI model does this               (category B)
+     --accent  blue     a person decides this               (category C)
+     --system  slate    deterministic software does this    (category A)
+     --clock   amber    a fixed wait, nobody owns it        (category D)
+
+   The waits are grey-amber and deliberately unsaturated because nobody owns
+   them. A background check does not come back faster because you bought
+   software.
+   ============================================================================ */
+
+:root {
+  /* --- NuAnchor palette, light --- */
+  --bg: #F7F9FC;
+  --surface: #FFFFFF;
+  --surface-2: #F1F5FA;
+  --ink: #10182B;
+  --muted: #4B596D;
+  --faint: #6B798B;
+  --line: #E2E8F0;
+  --line-soft: #EDF1F7;
+  --accent: #245AE2;
+  --accent-soft: #EBF1FA;
+  --accent-line: #C3D5F6;
+  --agent: #6029BC;
+  --agent-soft: #F4F0FE;
+  --agent-line: #DFD9FD;
+  --good: #067132;
+  --good-soft: #EAF7EE;
+  --shot-shadow: 0 1px 2px rgba(16, 24, 43, .05), 0 12px 32px rgba(16, 24, 43, .07);
+  --shadow-lift: -24px 0 60px rgba(11, 17, 30, 0.16);
+
+  /* NuAnchor ships --warn without a line token. Added for parity. */
+  --warn: #8C4A11;
+  --warn-soft: #FDF3E7;
+  --warn-line: #F0DCC0;
+
+  /* --- Added: a blocked or unlawful state --- */
+  --crit: #A81B2E;
+  --crit-soft: #FDEDEF;
+  --crit-line: #F1C6CC;
+
+  /* --- Added: deterministic software, no judgement --- */
+  --system: #52627A;
+  --system-soft: #EFF3F8;
+  --system-line: #D5DEEA;
+
+  /* --- Added: a wait nobody can compress --- */
+  --clock: #7A5B23;
+  --clock-soft: #FAF4E9;
+  --clock-line: #E8DBC2;
+
+  /* --- Type --- */
+  --sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --mono: "Geist Mono", ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+
+  /* Size-specific tracking. Large text tightens, small text opens up.
+     One letter-spacing value for every size is wrong somewhere. */
+  --t-display: 2.125rem;
+  --t-display-ls: -0.026em;
+  --t-display-lh: 1.06;
+  --t-h1: 1.5rem;
+  --t-h1-ls: -0.019em;
+  --t-h2: 1.125rem;
+  --t-h2-ls: -0.013em;
+  --t-h3: 0.9375rem;
+  --t-h3-ls: -0.006em;
+  --t-body: 0.875rem;
+  --t-body-ls: 0em;
+  --t-small: 0.8125rem;
+  --t-small-ls: 0.002em;
+  --t-micro: 0.6875rem;
+  --t-micro-ls: 0.075em;
+  --t-num: 1.75rem;
+  --t-num-ls: -0.02em;
+
+  /* --- Space, on a 4px grid, in rem so it scales with text size --- */
+  --s1: 0.25rem;
+  --s2: 0.5rem;
+  --s3: 0.75rem;
+  --s4: 1rem;
+  --s5: 1.25rem;
+  --s6: 1.5rem;
+  --s8: 2rem;
+  --s10: 2.5rem;
+  --s12: 3rem;
+
+  /* --- Radius. NuAnchor is mostly 12px with small chrome at 4 to 6. --- */
+  --r-sm: 5px;
+  --r-md: 8px;
+  --r-lg: 12px;
+  --r-pill: 999px;
+
+  /* --- Chrome --- */
+  --sidebar-w: 232px;
+  --topbar-h: 52px;
+  --shell-max: 1560px;
+
+  /* Translucent chrome. Bigger surfaces read as thicker, so the sidebar and
+     topbar blur harder than a chip does. */
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-blur: blur(20px) saturate(180%);
+  --glass-edge: rgba(255, 255, 255, 0.55);
+
+  /* --- Motion. Apple's two parameters, not the physics triplet.
+         Response is how fast it reaches the target, not a duration. --- */
+  --resp-fast: 0.22s;
+  --resp-ui: 0.34s;
+  --resp-slow: 0.44s;
+  /* Critically damped. No overshoot unless a gesture carried momentum. */
+  --ease-ui: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+
+  color-scheme: light dark;
+}
+
+/* Dark, for the default unstamped state, where only the OS setting decides.
+   Guarded so an explicit light choice still beats a dark OS. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0B111E;
+    --surface: #121A2A;
+    --surface-2: #182234;
+    --ink: #E8EDF6;
+    --muted: #9DAABE;
+    --faint: #7E8B9E;
+    --line: #23304A;
+    --line-soft: #1B2436;
+    --accent: #7FA6FF;
+    --accent-soft: #14203A;
+    --accent-line: #2C4373;
+    --agent: #B79BF5;
+    --agent-soft: #1D1730;
+    --agent-line: #3B2E63;
+    --good: #4FC97C;
+    --good-soft: #10261A;
+    --warn: #E0A458;
+    --warn-soft: #271B0F;
+    --warn-line: #4A3618;
+    --crit: #FF8F9A;
+    --crit-soft: #2B1015;
+    --crit-line: #52222A;
+    --system: #9AA9BF;
+    --system-soft: #171F30;
+    --system-line: #2A3750;
+    --clock: #D6B478;
+    --clock-soft: #241C0E;
+    --clock-line: #453619;
+    --shot-shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 14px 34px rgba(0, 0, 0, .35);
+    --shadow-lift: -24px 0 60px rgba(0, 0, 0, 0.5);
+    --glass-bg: rgba(18, 26, 42, 0.72);
+    --glass-edge: rgba(255, 255, 255, 0.07);
+  }
+}
+
+/* Dark, chosen explicitly. Wins over a light OS. */
+:root[data-theme="dark"] {
+  --bg: #0B111E;
+  --surface: #121A2A;
+  --surface-2: #182234;
+  --ink: #E8EDF6;
+  --muted: #9DAABE;
+  --faint: #7E8B9E;
+  --line: #23304A;
+  --line-soft: #1B2436;
+  --accent: #7FA6FF;
+  --accent-soft: #14203A;
+  --accent-line: #2C4373;
+  --agent: #B79BF5;
+  --agent-soft: #1D1730;
+  --agent-line: #3B2E63;
+  --good: #4FC97C;
+  --good-soft: #10261A;
+  --warn: #E0A458;
+  --warn-soft: #271B0F;
+  --warn-line: #4A3618;
+  --crit: #FF8F9A;
+  --crit-soft: #2B1015;
+  --crit-line: #52222A;
+  --system: #9AA9BF;
+  --system-soft: #171F30;
+  --system-line: #2A3750;
+  --clock: #D6B478;
+  --clock-soft: #241C0E;
+  --clock-line: #453619;
+  --shot-shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 14px 34px rgba(0, 0, 0, .35);
+  --shadow-lift: -24px 0 60px rgba(0, 0, 0, 0.5);
+  --glass-bg: rgba(18, 26, 42, 0.72);
+  --glass-edge: rgba(255, 255, 255, 0.07);
+}
+
+/* Light, chosen explicitly. Wins over a dark OS. */
+:root[data-theme="light"] {
+  --bg: #F7F9FC;
+  --surface: #FFFFFF;
+  --surface-2: #F1F5FA;
+  --ink: #10182B;
+  --muted: #4B596D;
+  --faint: #6B798B;
+  --line: #E2E8F0;
+  --line-soft: #EDF1F7;
+  --accent: #245AE2;
+  --accent-soft: #EBF1FA;
+  --accent-line: #C3D5F6;
+  --agent: #6029BC;
+  --agent-soft: #F4F0FE;
+  --agent-line: #DFD9FD;
+  --good: #067132;
+  --good-soft: #EAF7EE;
+  --warn: #8C4A11;
+  --warn-soft: #FDF3E7;
+  --warn-line: #F0DCC0;
+  --crit: #A81B2E;
+  --crit-soft: #FDEDEF;
+  --crit-line: #F1C6CC;
+  --system: #52627A;
+  --system-soft: #EFF3F8;
+  --system-line: #D5DEEA;
+  --clock: #7A5B23;
+  --clock-soft: #FAF4E9;
+  --clock-line: #E8DBC2;
+  --shot-shadow: 0 1px 2px rgba(16, 24, 43, .05), 0 12px 32px rgba(16, 24, 43, .07);
+  --shadow-lift: -24px 0 60px rgba(11, 17, 30, 0.16);
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-edge: rgba(255, 255, 255, 0.55);
+}
+
+/* Reduced transparency: frost the glass rather than blurring it. */
+@media (prefers-reduced-transparency: reduce) {
+  :root {
+    --glass-bg: var(--surface);
+    --glass-blur: none;
+  }
+}
+
+/* Higher contrast: near-solid surfaces with a defined border. */
+@media (prefers-contrast: more) {
+  :root {
+    --glass-bg: var(--surface);
+    --line: var(--muted);
+  }
+}

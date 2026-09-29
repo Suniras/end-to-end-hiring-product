@@ -1,0 +1,22 @@
+{
+  "_meta": {
+    "source": "https://registry.npmjs.org/pdf-lib",
+    "captured_at": "2026-08-09",
+    "kind": "npm-registry-metadata",
+    "redactions": [],
+    "note": "This is the generic, unscoped 'pdf-lib' package -- checked to rule it out as a Paradox publish. It is NOT Paradox's."
+  },
+  "body": {
+    "name": "pdf-lib",
+    "description": "Create and modify PDF files with JavaScript",
+    "repository": "https://github.com/Hopding/pdf-lib.git",
+    "homepage": "https://pdf-lib.js.org/",
+    "author": "Andrew Dillon <andrew.dillon.j@gmail.com>",
+    "latest_version": "1.17.1",
+    "created_at": "2017-09-04T14:23:28.384Z",
+    "modified_at": "2022-05-12T18:02:10.238Z"
+  },
+  "_decoded": {
+    "verdict": "Unrelated, independently-authored famous open-source library (Andrew 'Hopding' Dillon). Zero Paradox affiliation. The GitHub repo ParadoxAi/pdf-lib is a private fork of this project; Paradox's own build is published separately under the npm scope @prd-huy-ta/pdf-lib (see prd-huy-ta-pdf-lib.json), not under this generic name."
+  }
+}
