@@ -1,0 +1,95 @@
+<!doctype html>
+<!-- ==========================================================================
+     app.html  ·  the operator application
+
+     TWO PRODUCTS. This is the operator side and it is a different product from
+     the candidate side at careers.html. It has a navigation rail, a store
+     switcher, a work queue and a case drawer. The candidate side has none of
+     those and must never inherit this shell: somebody applying for a job does
+     not get an operations console. They share tokens.css and the primitives in
+     app.css. Nothing else crosses.
+
+     WHY THE MARKUP IS ALMOST EMPTY. Every name, store, verb, deadline,
+     citation and refusal sentence comes from the API. Writing any of it here
+     would put a person or a number into a template, and the standing rule on
+     this project is that nothing on screen is invented. The mount points below
+     are the whole contract with app.js.
+
+     LIGHT BY DEFAULT. tokens.css declares light on :root and dark only under
+     an explicit [data-theme="dark"]. There is no prefers-color-scheme block:
+     one used to exist and it meant the product opened dark on any machine set
+     to dark, which is most of them.
+     ========================================================================== -->
+<html lang="en-US">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <!-- THE HEAD IS WRITTEN BY THE SERVER. server/lib/pagemeta.js splices the
+       title, the robots line, the canonical URL and the icons in here at send
+       time, because a single-page application that sets its own title after
+       the document has loaded gives every route the same label in a tab, in
+       history and in a bookmark. The line below is the fallback for anybody
+       opening this file directly, which nothing in the product does. -->
+  <!--HEAD-->
+  <title>Hiring operations</title>
+  <meta name="robots" content="noindex, nofollow">
+  <!--/HEAD-->
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/app.css">
+  <link rel="stylesheet" href="/css/shell.css">
+  <link rel="stylesheet" href="/css/ops.css">
+</head>
+<body>
+  <div class="ops" id="ops">
+
+    <!-- The brand block sits in the rail's column, above it, so the rail reads
+         as one piece of chrome rather than two. The tenant name is filled from
+         the API: naming the fictional retailer here would hard-code the fiction
+         into the document. -->
+    <div class="ops-brand" id="brand"></div>
+
+    <header class="ops-top">
+      <!-- Search is in the chrome rather than on a page, because finding one
+           person is a thing somebody does from anywhere. -->
+      <div class="ops-find">
+        <span class="ico" id="findico"></span>
+        <input id="find" type="search" placeholder="Find somebody by name"
+               aria-label="Find somebody by name" autocomplete="off">
+      </div>
+      <span class="spacer"></span>
+      <!-- The simulated present, in the store's own local time. It used to
+           render UTC everywhere, so the anchor the code calls "a Monday
+           morning" printed as 03:04 at an Ohio store. -->
+      <div class="ops-clockline" id="clockline"></div>
+      <!-- Moves the present forward and lets the ordinary ticker run. It does
+           not fabricate anything: an offer lapses because the engine ticked
+           past its expiry. -->
+      <button class="btn sm" id="clock" type="button"
+              title="Move the simulated present forward four hours">+4h</button>
+    </header>
+
+    <nav class="ops-rail" id="rail" aria-label="Operator navigation"></nav>
+
+    <div class="ops-page" id="page">
+      <div class="ops-page-in">
+        <!-- The demonstration marker is rendered from the tenant record, never
+             a string in this file, so removing it means editing the dataset.
+             It sits outside the page mount so a repaint cannot delete it. -->
+        <div class="ops-marker" id="marker"></div>
+        <main id="main">
+          <div class="ops-hd">
+            <div class="ops-hd-top"><h1 id="boothd">Starting a session</h1></div>
+            <p class="lede" id="boot">Reading everything a named person owns at your stores.</p>
+          </div>
+          <noscript>
+            <p class="copy">This surface reads the live queue from the hiring system when it
+            loads, so it needs JavaScript switched on. Nothing here is a static list.</p>
+          </noscript>
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/js/app.js"></script>
+</body>
+</html>

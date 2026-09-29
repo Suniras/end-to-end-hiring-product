@@ -1,0 +1,331 @@
+/* ============================================================================
+   tokens.css  ·  colour, type, space and motion
+
+   The four owner hues and the primary are NuAnchor's, lifted from the live
+   product, so this is the same house design language rather than an imitation
+   of it. D-019. Measured on their own surfaces they all pass AA and are not
+   retuned: --accent 5.78:1 light and 7.29:1 dark, --agent 8.27 and 7.47,
+   --system 6.20 and 7.29, --clock 6.27 and 8.83.
+
+   The NEUTRALS are rebuilt. U-96. Three measured failures in the values this
+   replaces:
+     --faint      4.44:1 on --surface, under AA, and used at 36 sites mostly at
+                  11px, which is the worst possible place for it
+     --line-soft  1.13:1 light and 1.12:1 dark, which is not a visible divider
+                  at all, while being the row rule on twenty funnel rows
+     --accent against --system in dark theme, at a luminance ratio of 1.000,
+                  exactly identical, which is a named human against
+                  deterministic software and the one distinction the New York
+                  City and California rules turn on. Fixed 16 September 2026:
+                  dark --system moved to #8695AC and now separates from all
+                  three other hues. The note on that token carries the
+                  measurements and says what was deliberately NOT retuned.
+
+   THE FOUR-COPY TRAP, and why this file is structured the way it is. The
+   previous token file declared the whole palette four times, once per theme
+   state, so every token existed in four places and a fix had to land in all
+   four or the explicit theme toggle kept the failing value. Here the light
+   palette is declared once on bare :root and the dark blocks redefine ONLY the
+   tokens that differ. A value can no longer be half-fixed.
+
+   OWNER ENCODING, which is the whole idea. Every one of the twenty funnel
+   steps is owned by exactly one of four things and each gets a hue. The
+   categories come from the automation breakdown, so the colour system is the
+   analysis rather than decoration.
+
+     --agent   purple   an AI model does this
+     --accent  blue     a person decides this
+     --system  slate    deterministic software does this
+     --clock   amber    a fixed wait, nobody owns it
+
+   Colour is never the only carrier. U-98 puts a distinct glyph on every actor
+   type as well, because reduced to luminance these hues collapse.
+
+   ZERO RAW HEX OUTSIDE THIS FILE. U-104. Every colour in the application sits
+   on a class encoding an owner, a tone or an interaction state, and
+   `grep -c '#[0-9A-Fa-f]\{3,6\}' web/css/app.css` must return 0. The three
+   tokens at the end of the colour block exist to make that possible.
+   ============================================================================ */
+
+:root {
+  /* --- Surfaces and ink, light --- */
+  /* Five grounds, not two. Depth comes from a step in the scale rather than
+     from another border or another dark card. --bg is never white, so a white
+     surface reads as raised without a shadow, which is what keeps the
+     elevation rule honest. --surface-3 is for a row that is selected or a
+     header inside an already-raised surface. */
+  --bg: #F4F7FB;
+  --surface: #FFFFFF;
+  --surface-2: #F7F9FC;
+  --surface-3: #EDF2F8;
+  --surface-sunken: #E9EFF6;
+  --ink: #10182B;
+  --muted: #4B596D;
+
+  /* Was #6B798B at 4.44:1. Now 5.27:1 on --surface and 4.81:1 on --surface-2,
+     both above AA, which matters because this is the 11px token. */
+  --faint: #5F6D80;
+
+  /* Nudged from #E2E8F0 on 8 Sep 2026. At that value a rule measured 1.17:1
+     against --bg, so a border on the page ground was weaker than the same
+     border inside a card. Now 1.25:1 on --bg and 1.31:1 on --surface. */
+  --line: #DBE2EC;
+
+  /* Was #EDF1F7 at 1.13:1, which is not a divider. Now 1.26:1. Still quiet on
+     purpose: it is a row rule, not a border. Density does not work without it,
+     because a dense table with no visible rule is a wall. U-99 depends on this. */
+  --line-soft: #E0E6EF;
+
+  /* --- The primary and the four owner hues. Unchanged. --- */
+  --accent: #245AE2;
+  --accent-soft: #EBF1FA;
+  --accent-line: #C3D5F6;
+  --agent: #6029BC;
+  --agent-soft: #F4F0FE;
+  --agent-line: #DFD9FD;
+  --system: #52627A;
+  --system-soft: #EFF3F8;
+  --system-line: #D5DEEA;
+  --clock: #7A5B23;
+  --clock-soft: #FAF4E9;
+  --clock-line: #E8DBC2;
+
+  /* --- Tone. Never applied without a sibling numeric value. U-101. --- */
+  --good: #067132;
+  --good-soft: #EAF7EE;
+  /* New. The good chip was the only chip bordering with the full-strength hue
+     while every other chip used a -line token. U-97. */
+  --good-line: #BFE3CC;
+  --warn: #8C4A11;
+  --warn-soft: #FDF3E7;
+  --warn-line: #F0DCC0;
+  --crit: #A81B2E;
+  --crit-soft: #FDEDEF;
+  --crit-line: #F1C6CC;
+
+  /* New. These two retire the six raw hex values that sat in the stylesheet,
+     which were #fff and #0B111E used as text on a filled accent. U-97 and
+     U-104. Named for what they are for, not for what colour they happen to be,
+     which is why they can flip in dark theme without a second name. */
+  --on-accent: #FFFFFF;
+  --on-accent-ink: #10182B;
+
+  /* --- Type. Inter and Geist Mono, confirmed. U-100. --- */
+  --sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --mono: "Geist Mono", ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+
+  /* Size-specific tracking. Large text tightens as it grows, small text opens
+     up. One letter-spacing value for every size is wrong somewhere. */
+  --t-display: 2.125rem;
+  --t-display-ls: -0.026em;
+  --t-display-lh: 1.06;
+  --t-h1: 1.5rem;
+  --t-h1-ls: -0.019em;
+  --t-h2: 1.125rem;
+  --t-h2-ls: -0.013em;
+  --t-h3: 0.9375rem;
+  --t-h3-ls: -0.006em;
+  --t-body: 0.875rem;
+  --t-body-ls: 0em;
+  --t-small: 0.8125rem;
+  --t-small-ls: 0.002em;
+  --t-micro: 0.6875rem;
+  --t-micro-ls: 0.075em;
+
+  /* Was 1.75rem, which is 28px. U-05 specifies a THIN metrics strip and 28px
+     is a hero number inside one. Down to 22px, which still reads as the
+     largest number on the page at this density without becoming the page. */
+  --t-num: 1.375rem;
+  --t-num-ls: -0.02em;
+
+  /* Non-menu variable weights, kept deliberately. U-107. A variable axis set
+     at values that are not on the standard menu reads as drawn rather than
+     picked, which is one of the few concrete things carrying P-02. Do not
+     round these to 400, 500, 600, 700. */
+  --w-normal: 450;
+  --w-medium: 550;
+  --w-strong: 580;
+  --w-bold: 620;
+  --w-heavy: 640;
+
+  /* --- Space, on a 4px grid, in rem so it scales with the text size --- */
+  --s1: 0.25rem;
+  --s2: 0.5rem;
+  --s3: 0.75rem;
+  --s4: 1rem;
+  --s5: 1.25rem;
+  --s6: 1.5rem;
+  --s8: 2rem;
+  --s10: 2.5rem;
+  --s12: 3rem;
+
+  /* --- Density. One density everywhere. U-99.
+         The target is a 36 to 40px row, because .step at the old padding was
+         about 62px and twenty of those plus stage headers exceeds 1240px, so
+         the merged funnel could not be one view. U-40 only reads as an
+         argument if the whole distribution is visible at once. --- */
+  --row-h: 38px;
+  --row-pad-y: var(--s2);
+  --row-pad-x: var(--s3);
+  --cell-pad-y: var(--s2);
+  --cell-pad-x: var(--s3);
+  --card-pad: var(--s4);
+
+  /* --- Radius --- */
+  --r-sm: 5px;
+  --r-md: 8px;
+  --r-lg: 12px;
+  --r-pill: 999px;
+
+  /* --- Chrome ---
+     --sidebar-w, --assistant-w and --shell-max WERE HERE AND ARE GONE. They
+     were read by the three-column `.shell` grid in app.css, which nothing has
+     rendered since the operator side moved to `.ops` in shell.css and the
+     candidate side to `.pub` in careers.css. The rail's own width lives with
+     the rail, in shell.css, because that file is the only thing that reads it.
+     A token nothing reads is a measurement of an interface that does not
+     exist. --- */
+  --topbar-h: 52px;
+
+  /* Translucent chrome, on the topbar and the sidebar only, where it signals
+     content passing behind. The saturate came down from 180 per cent, because
+     the saturation boost is the part that reads as glassmorphism rather than as
+     depth. U-103. */
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-blur: blur(20px) saturate(115%);
+  --glass-edge: rgba(255, 255, 255, 0.55);
+
+  /* Elevation is reserved for things that genuinely float: the sheet, the
+     drawer, the assistant panel and :focus-visible. Everything else separates
+     with --line and a --surface-2 step. U-103. Two shadows exist because there
+     are two kinds of floating, and no third is needed. */
+  --shadow-float: 0 1px 2px rgba(16, 24, 43, .05), 0 12px 32px rgba(16, 24, 43, .07);
+  --shadow-lift: -24px 0 60px rgba(11, 17, 30, 0.16);
+
+  /* The hatch that marks waiting time on a time bar. U-102.
+     45 degrees on a fixed 6px pitch. Work stays a solid var(--owner) fill.
+     A tint was rejected because with the fill set from var(--owner) a tint puts
+     --system-line beside --system, and where two bars overlap one bar's tinted
+     wait and another's solid work land at similar luminance and read as one
+     shape. U-21 puts twenty overlapping bars on one page, so overlap is the
+     test. Hatching survives overlap, greyscale, print and any colour vision.
+
+     This is a repeating-linear-gradient, which is technically a gradient. The
+     no-gradients rule is NARROWED, not reversed: decorative gradients stay
+     banned and this is a two-stop texture carrying a data distinction. Recorded
+     so a verification pass does not read a non-zero gradient count as a
+     reversal and strip it. */
+  --hatch-pitch: 6px;
+  --hatch-angle: 45deg;
+  --hatch-ink: rgba(16, 24, 43, 0.34);
+
+  /* --- Motion. Two parameters, not the physics triplet. Response is how fast
+         a value reaches its target, not a duration. --- */
+  --resp-fast: 0.22s;
+  --resp-ui: 0.34s;
+  --resp-slow: 0.44s;
+  /* Critically damped. No overshoot unless a gesture carried momentum. */
+  --ease-ui: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+
+  /* LIGHT IS THE DEFAULT AND IT IS NOT NEGOTIABLE BY THE OPERATING SYSTEM.
+     This used to read `light dark`, with a prefers-color-scheme block below,
+     so the whole product went dark on any machine set to dark. An operations
+     console that a manager reads for long stretches, and that a retailer's
+     counsel reads compliance text in, opens light. Dark stays available and is
+     opt in: [data-theme="dark"] on the root. */
+  color-scheme: light;
+}
+
+/* ---------------------------------------------------------------------------
+   DARK, AND ONLY WHEN SOMEBODY ASKS FOR IT.
+
+   There is deliberately no prefers-color-scheme block. There was one, and it
+   meant the product opened dark on any machine set to dark, which is most of
+   them. Long-form operational reading, compliance citations and a work queue
+   somebody scans at speed all belong on a light ground. Dark is a preference,
+   not a default, and it is set by stamping the root.
+   --------------------------------------------------------------------------- */
+
+:root[data-theme="dark"] {
+  --bg: #0B111E;
+  --surface: #121A2A;
+  --surface-2: #182234;
+  --ink: #E8EDF6;
+  --muted: #9DAABE;
+  --faint: #7E8B9E;
+  --line: #23304A;
+  --line-soft: #26324B;
+  --accent: #7FA6FF;
+  --accent-soft: #14203A;
+  --accent-line: #2C4373;
+  --agent: #B79BF5;
+  --agent-soft: #1D1730;
+  --agent-line: #3B2E63;
+  /* WAS #9AA9BF, AND ITS LUMINANCE WAS IDENTICAL TO --accent's TO FOUR DECIMAL
+     PLACES. Measured in the running product: accent 0.3900, system 0.3901, a
+     contrast ratio between them of exactly 1.00. Reduced to greyscale, to a
+     print-out, or to any of the common colour vision differences, a named
+     human and deterministic software were the same colour, and that is the one
+     distinction the New York City and California rules turn on.
+
+     Now 5.72:1 on --surface, which is still comfortably above AA, and 1.27
+     against --accent, 1.30 against --agent and 1.57 against --clock, so it is
+     separable from all three rather than only from the amber.
+
+     THE OTHER THREE HUES ARE NOT RETUNED. D-019 lifted them from NuAnchor's
+     live product and they are the house language rather than an imitation of
+     it. In LIGHT theme they still cluster: accent 0.1318, system 0.1193, clock
+     0.1174, so accent against system measures 1.09 and system against clock
+     measures 1.01. That is recorded rather than fixed because retuning a
+     palette taken from a shipped product is a decision somebody has to make,
+     and because U-98 already puts a distinct glyph on every actor type for
+     exactly this reason: the colour has never been the only carrier. */
+  --system: #8695AC;
+  --system-soft: #171F30;
+  --system-line: #2A3750;
+  --clock: #D6B478;
+  --clock-soft: #241C0E;
+  --clock-line: #453619;
+  --good: #4FC97C;
+  --good-soft: #10261A;
+  --good-line: #235C39;
+  --warn: #E0A458;
+  --warn-soft: #271B0F;
+  --warn-line: #4A3618;
+  --crit: #FF8F9A;
+  --crit-soft: #2B1015;
+  --crit-line: #52222A;
+  --on-accent: #0B111E;
+  --on-accent-ink: #E8EDF6;
+  --glass-bg: rgba(18, 26, 42, 0.72);
+  --glass-edge: rgba(255, 255, 255, 0.07);
+  --shadow-float: 0 1px 2px rgba(0, 0, 0, .4), 0 14px 34px rgba(0, 0, 0, .35);
+  --shadow-lift: -24px 0 60px rgba(0, 0, 0, 0.5);
+  --hatch-ink: rgba(232, 237, 246, 0.30);
+}
+
+/* Accessibility preferences. Three independent signals, each honoured. */
+
+@media (prefers-reduced-transparency: reduce) {
+  :root {
+    --glass-bg: var(--surface);
+    --glass-blur: none;
+  }
+}
+
+@media (prefers-contrast: more) {
+  :root {
+    --faint: var(--muted);
+    --line-soft: var(--line);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --resp-fast: 0.01s;
+    --resp-ui: 0.01s;
+    --resp-slow: 0.01s;
+  }
+}

@@ -1,0 +1,134 @@
+<!doctype html>
+<!-- ==========================================================================
+     careers.html  ·  pages 11 and 12, the candidate-facing surfaces
+
+     WHAT THIS FILE IS FOR. It is the front of the live demo spine. A candidate
+     in the room opens this page, browses the eight real requisitions, reads the
+     disclosure, fills the form, and a real application appears in the product
+     while everybody watches. Pages 11 and 12 of the spec are one document on
+     purpose: the job list, the disclosure gate, the form and the confirmation
+     are four phases of one visit and a page reload between them would lose the
+     consent id and the form.
+
+     WHAT BREAKS WITHOUT IT. Nothing creates an application. The seeded
+     thirty-six start at step 2 and the demo has no beginning. U-90 built the
+     intake endpoint; this is the only thing that calls it.
+
+     WHY THE MARKUP IS ALMOST EMPTY. Every job title, rate, shift pattern and
+     disclosure paragraph comes from the server. Writing any of it here would
+     put the fiction into the template, and U-55 requires the demonstration
+     marker to be rendered from `org.fictional` so that removing it means
+     editing the tenant record rather than editing a page. The four mount
+     points below are the whole contract with careers.js.
+
+     WHY THERE IS NO APP SHELL. app.css's `.shell` is a three-column operator
+     chrome with a navigation rail and an assistant column. A person applying
+     for a job is not an operator, has no navigation, and must never see the
+     assistant. So this page uses the same tokens and the same primitives and
+     none of the chrome.
+
+     FONTS. Inter and Geist Mono are named in tokens.css with a real fallback
+     stack behind each. Nothing is fetched here: this page must load on a
+     laptop with no network on 20 September.
+
+     THE REFERENCE VIEWPORT IS 390 BY 844, and it is stated here because it was
+     nowhere for the first three weeks of this page's life. Every candidate
+     surface is judged at that size first. The measured cost of not having it:
+     the disclosure gate ran to 2,631px of scroll, roughly three screens before
+     a thumb could reach the tick box, and the two shift boxes the Deli role
+     requires sat off the right edge of the phone at x=319 and x=377 inside a
+     324px window. Both were fixed on 8 September 2026.
+     ========================================================================== -->
+<html lang="en-US">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- THE HEAD IS WRITTEN BY THE SERVER, per URL. server/lib/pagemeta.js
+       splices the title, the description, the canonical link, the icons, the
+       social card and, on a role page, the JobPosting record in here. It is
+       built from the same public projection the browser renders, so there is
+       no path by which the structured data can describe a job this page does
+       not show. The three lines below are the fallback for anybody opening
+       this file directly, which nothing in the product does. -->
+  <!--HEAD-->
+  <title>Careers</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="Open hourly roles, and how this hiring process works.">
+  <!--/HEAD-->
+  <!-- ABSOLUTE, NOT RELATIVE. These were "./css/...", which resolved against
+       the document's own directory. The candidate flow has nested paths now, so
+       on /careers/roles/<id> the browser asked for /careers/roles/css/tokens.css
+       and got a 404: an unstyled page and three broken requests in the console. -->
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/app.css">
+  <link rel="stylesheet" href="/css/careers.css">
+</head>
+<body>
+  <div class="pub">
+
+    <header class="pub-top">
+      <!-- Filled from org.name. Left empty rather than guessed. -->
+      <div class="pub-brand" id="brand"></div>
+      <div class="pub-top-r micro faint" id="topnote"></div>
+    </header>
+
+    <main class="pub-body" id="body">
+
+      <!-- U-55. The permanent demonstration marker. Rendered from
+           org.fictional, never written into this file. -->
+      <div id="marker"></div>
+
+      <!-- Job, disclosure, form, sent. Rendered so a person can see how far
+           through they are and what is still to come. careers.js puts a <nav>
+           in here, so this is a plain box rather than a second nav. -->
+      <div id="rail"></div>
+
+      <div id="view">
+        <!-- A loading state that keeps its context, which is the rule in
+             app.css: never "Loading...". This is replaced on first paint. -->
+        <div class="card">
+          <div class="card-hd"><h2>Open roles</h2></div>
+          <div class="card-bd">
+            <p class="copy muted" id="boot">Reading the open requisitions from the hiring system.</p>
+            <noscript>
+              <p class="copy">This page reads the live job list from the hiring system when it
+              loads, so it needs JavaScript switched on. Nothing here is a static list of jobs.</p>
+            </noscript>
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+    <footer class="pub-foot">
+      <!-- `small`, not `micro`. app.css puts text-transform: uppercase on
+           `.micro`, so this footer rendered three lines of a full sentence in
+           capitals at a candidate. Capitals are for a two-word label, never
+           for prose. -->
+      <div class="pub-foot-in small faint" id="foot"></div>
+    </footer>
+
+  </div>
+
+  <!-- THE VOICE CLIENT, and it is optional on purpose.
+
+       `renderCalls` in careers.js will not offer the browser call unless a
+       client is actually on the page, because the previous behaviour was to
+       call the API first, provision a room and a participant token at the
+       provider, and then print a sentence saying nothing was connected. That
+       spent the vendor's resource on a call nobody could join.
+
+       This file is served from web/, so the build has to be copied to
+       web/vendor/livekit-client.umd.js. It is not in the repository: the
+       package is a devDependency and node_modules is not served. Until it is
+       there this request 404s, `window.LivekitClient` stays undefined, and the
+       browser button renders disabled with that as its stated reason. Nothing
+       else breaks and no room is provisioned.
+
+       Classic script, not a module, so it runs before the deferred module
+       below and `voiceClient()` can stay a synchronous check. -->
+  <script src="/vendor/livekit-client.umd.js"></script>
+
+  <script type="module" src="/js/careers.js"></script>
+</body>
+</html>

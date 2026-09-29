@@ -1,0 +1,32 @@
+{
+  "_meta": {
+    "source": "https://api.github.com/repos/ParadoxAi/packer-plugin-salt (+ /releases, + compare API)",
+    "captured_at": "2026-08-09",
+    "kind": "github-repo-metadata (not registry-published)",
+    "redactions": []
+  },
+  "body": {
+    "repo": "ParadoxAi/packer-plugin-salt",
+    "is_fork": true,
+    "parent": "hashicorp/packer-plugin-salt",
+    "upstream_status": "upstream (hashicorp/packer-plugin-salt) is itself archived/unmaintained per its own description: 'This Packer provisioner has been archived due to it no longer being maintained.'",
+    "created_at": "2024-03-07T04:38:11Z",
+    "pushed_at": "2025-08-28T19:41:21Z",
+    "archived_on_paradox_fork": false,
+    "language": "Go",
+    "license": "MPL-2.0",
+    "releases_count": 1,
+    "releases": [{ "tag": "1.0.0", "published_at": "2024-03-07T07:20:30Z", "assets": 0 }],
+    "compare_to_upstream_main": {
+      "status": "ahead",
+      "ahead_by": 4,
+      "behind_by": 0,
+      "commits": "all 4 are dependabot go_modules dependency bumps -- zero functional/feature commits by a Paradox engineer"
+    },
+    "pkg_go_dev_indexed": false,
+    "distribution_channel_checked": "GitHub Releases (correct distribution channel for a Packer plugin, not npm/PyPI) -- one tag (1.0.0) exists with zero binary assets attached, meaning even the one release has no downloadable plugin binary"
+  },
+  "_decoded": {
+    "interpretation": "A near-dormant fork of an already-deprecated HashiCorp Packer provisioner plugin. No Paradox-authored functional commits (only automated dependency bumps), no Go module proxy indexing (pkg.go.dev has never resolved a `go get` for it), and the sole GitHub release has no attached binary. Best read as a legacy VM/Salt-based provisioning artifact from an earlier infra era, kept alive only by Dependabot -- consistent with the recon-plan's 'legacy on-prem/VM lineage' hypothesis, but the evidence here is closer to ABANDONED than actively used."
+  }
+}

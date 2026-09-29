@@ -1,0 +1,25 @@
+{
+  "name": "frontline-hire",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "A hiring operating system for US retail frontline roles. Twelve surfaces over one workflow engine.",
+  "engines": { "node": ">=22.5.0" },
+  "scripts": {
+    "dev": "node server/index.js",
+    "build": "vite build",
+    "start": "node server/index.js",
+    "test": "node tools/test.js",
+    "lint:css": "node tools/css-lint.js"
+  },
+  "dependencies": {
+    "compression": "1.8.1",
+    "express": "5.2.1",
+    "resend": "6.26.0",
+    "zod": "4.1.12"
+  },
+  "devDependencies": {
+    "livekit-client": "2.22.3",
+    "vite": "8.2.2"
+  }
+}

@@ -1,0 +1,1379 @@
+# =============================================================================
+# retail-workflow-v0.1.yaml
+#
+# A DESIGN ARTIFACT. Nothing loads this file. It is not executable, it is not
+# read by the demo, and no code was changed to produce it.
+#
+# What it is: our twenty-step US retail frontline hiring funnel expressed as a
+# versioned declarative workflow definition, in the node vocabulary the IndiGo
+# HRSS implementation actually ships (solutioning.md section 8.2, verified
+# against a4274fc on 2026-09-02).
+#
+# Why it exists: the compatibility audit concluded "share the contract, not the
+# runtime". Their roadmap section 19 says the second workflow type is the
+# forcing function that proves their engine is generic. This is that second
+# workflow, written down before anybody builds anything.
+#
+# Draft 2, 2 September 2026. Draft 1 was attacked by five independent reviewers
+# and did not survive intact. What changed and why is in `revision_log` at the
+# foot of this file. Revising a draft is legitimate; the insert-only rule below
+# binds at publish, and `status` is `draft`.
+#
+# Companion documents:
+#   retail-workflow-contract-gaps.md   what this exposed
+#   retail-vs-indigo-mapping.md        reuse, adapt or reject, line by line
+#
+# -----------------------------------------------------------------------------
+# READING NOTES
+#
+# provenance:  Says where a capability exists TODAY.
+#                ours     implemented in our repository
+#                ref      implemented in the IndiGo build
+#                both     implemented in both
+#                neither  a gap this definition exposes. Nothing implements it
+#              Nothing here is described as working because it appears in a
+#              YAML file. Draft 1 carried one fabricated `ref` tag and the
+#              field failed at its only job, so the rule is now explicit:
+#              a `ref` tag requires a locatable quotation in solutioning.md.
+#
+# control:     Three values, not two. Draft 1 had two and consequently marked
+#              our own user's in-store work EXTERNAL, which called the customer
+#              external.
+#                CONTROLLABLE  we automate, accelerate, score, route or
+#                              orchestrate it
+#                EXTERNAL      somebody outside owns the clock: the candidate,
+#                              the screening agency, a government department.
+#                              We initiate, monitor and surface. We cannot
+#                              compress it
+#                OBSERVED      it happens inside the customer, a person does
+#                              it, and we surface state without driving it.
+#                              Steps 17 and 18 are this, and calling them
+#                              EXTERNAL was wrong
+#              An EXTERNAL node is never marked complete because we initiated
+#              it. It completes when the outside world returns.
+#              `control` has no counterpart in the reference vocabulary. It is
+#              a declared addition, and it is product framing rather than
+#              execution semantics. See `contract_delta`.
+#
+# by:          Which actor types may take an edge. Ours, and load-bearing:
+#              checked generically at workflow.js:496, returning
+#              `refused: 'actor_not_permitted'`. Two edges may share a from and
+#              a to and differ only in `by`, which is already in production for
+#              the rehire hold. Draft 1 dropped this field, which made the
+#              definition less expressive than the code it was describing.
+#
+# owner:       system | agent | human | external
+#              Our repository has a fourth owner, `clock`. It does not survive
+#              the translation, and that is a simplification rather than a loss:
+#              a fixed wait is a TIMER and a wait on somebody else is an
+#              EVENT_WAIT, so the node type already carries what `clock` meant.
+#
+# actor:       WHO PERFORMS, as distinct from who is accountable. Our task rows
+#              already carry both, and they disagree on purpose: an I-9 Section
+#              1 is `owner: system, actor: candidate`, because software drives
+#              the form and the candidate fills it in.
+#              This is a genuine collision with the reference vocabulary and it
+#              is a question for review rather than something to pick quietly.
+#              A `CANDIDATE_TASK` there implies the candidate is the owner; here
+#              the same work is owned by the system and acted on by the
+#              candidate. Both readings are defensible. The contract has to say
+#              which one it means, and this draft keeps our two-field version.
+#
+# NODE TYPE NAMING. The ten type names are theirs, verbatim, because contract
+# compatibility is the point of the exercise. `HRSS_TASK` is an IndiGo job
+# title rather than a concept; the rename argument is in the gaps document.
+# =============================================================================
+
+apiVersion: hiring.workflow/v0
+kind: WorkflowDefinition
+
+metadata:
+  name: retail-frontline-hire
+  version: 1
+  status: draft                 # draft | published | archived
+  mutable: false                # binds at publish, per their V22/V23 discipline
+  tenant: tn_sunfield
+  jurisdiction: us-federal      # selects the rule pack. See `conditions`.
+  description: >
+    Application to day ninety for hourly frontline retail roles. Twenty funnel
+    steps. Seventeen of nineteen classifiable steps are a wait or a handoff,
+    which is why the queue rather than the step is the product.
+  source_of_truth:
+    steps: demo/js/steps.js                    # the canonical twenty-step table
+    states: demo/server/lib/schema.js          # 27 states, 50 transitions
+    tasks: demo/server/lib/schema.js           # ONBOARDING_TASKS, 11 with 4 dep edges
+    rules: demo/server/lib/rules.js            # 5 eligibility rules, the rehire lookup
+    clocks: demo/server/lib/compliance.js      # 5 statutory clocks
+    exceptions: demo/server/lib/workflow.js    # 6 kinds raised, verified by grep
+  decisions:
+    - D-013  all twenty steps, no slice
+    - D-016  step 6 produces a score, a human still decides
+    - D-014  we never perform background checks, we order and track them
+    - D-022  I-9 and E-Verify through an embedded vendor exposing case state
+    - D-030  single-tenant matching only, enforced at the data layer
+
+# =============================================================================
+# CONTRACT DELTA
+#
+# Draft 1 claimed "one contract extension". That was false: it added roughly a
+# dozen fields with no counterpart in the reference vocabulary and declared
+# none of them. Every addition is now listed here, with whether it is genuinely
+# needed or merely convenient. A document whose purpose is to state the
+# contract delta has to state all of it.
+# =============================================================================
+
+contract_delta:
+
+  genuinely_needed:
+    - field: conditions
+      why: >
+        A named, reusable predicate referenced from more than one place. The
+        E-Verify adverse action bar is one condition enforced at four edges and
+        one activity, and writing the predicate five times is how the five
+        copies drift apart. Our GUARDS registry at workflow.js:54 is already
+        exactly this: `guard: 'eligibilityPassed'` is a string key resolved
+        from a map. So the extension is a name for something both systems have.
+      smallest_form: "a map of name to expression, resolved the way activities are"
+
+    - field: "tasks[].needs"
+      why: >
+        THE ONE GENUINE STRUCTURAL GAP, and it is not the one draft 1 named.
+        Steps 11 to 14 are eleven tasks with four dependency edges: i9_s2 needs
+        i9_s1, everify needs i9_s2, payroll needs w4 and direct_dep, systems
+        needs payroll. That is an arbitrary directed acyclic graph.
+        PARALLEL_SPLIT and PARALLEL_JOIN express fork and join, which is a
+        strictly weaker shape: you cannot draw "these four start together, this
+        fifth waits on two of them, this sixth waits on the fifth" with nested
+        fork-join without inventing intermediate joins that correspond to
+        nothing in the business.
+        Draft 1 hid this by putting a second graph inside one node and calling
+        it a field. It is a real gap in the shared vocabulary.
+      smallest_form: >
+        A parallel region whose members may declare dependencies on each other,
+        rather than a split whose branches are independent by construction.
+        Their five gates and our AND guards are both the join half; the
+        dependency half has no expression.
+
+  declared_additions_that_are_convenience_not_contract:
+    - field: control
+      note: >
+        CONTROLLABLE, EXTERNAL or OBSERVED. Retail product framing, not
+        execution semantics. Belongs in our layer and in the funnel map, not in
+        a shared core. Kept in this draft because the business distinction is
+        required, and given a third value because two called our own user
+        external.
+    - field: actor
+      note: >
+        Who performs, as distinct from who is accountable. Our task rows carry
+        both. Required on every staff node here, which is also the fix for
+        HRSS_TASK flattening three retail roles into one IndiGo desk title.
+        Store manager, field HR and manager are not the same person."
+    - field: waiting_on
+      note: "candidate | agency | government. Ours. Small and worth contributing, but the contract works without it."
+    - field: provenance
+      note: "A property of this document, not of a workflow. Would not exist in a real definition."
+    - field: "law, deadline, deadline_note"
+      note: "Jurisdiction rule pack content. Should be resolved from the pack, not inlined in a graph."
+    - field: "human_required, human_required_reason"
+      note: "Documentation. The enforceable version is `by: [human]`."
+    - field: "assistant_may, assistant_may_not"
+      note: "Documentation of our tool confirmation levels. Not a workflow concept."
+    - field: "raises_exception, blocks_progress"
+      note: "Ours. Their ExceptionItem exists; the blocking semantic is our addition."
+    - field: "records, est_ms, covers_steps, accompanied_by, outcomes, then"
+      note: "Notation for this document's readability."
+
+  removed_from_draft_1:
+    - field: policies
+      why: >
+        Dismantled on review and correctly. Three properties were claimed to
+        make it unrepresentable; all three failed.
+        Visibility: false. Guards receive (store, ctx, a) at workflow.js:517
+        and the bar reads a.everify.decision, which is a field on the
+        application row. A guard on the termination edge has exactly the same
+        visibility as adverseActionBlock().
+        Actor sensitivity: already expressible. `by` on the edge, and the
+        two-edges-differing-only-in-`by` pattern is in production.
+        Non-edge effects: already expressible. `preconditions` on the activity,
+        a field draft 1 used elsewhere in the same file.
+        Arithmetic: 25 transitions reach an adverse state and none carries a
+        guard, so the enforcement slots are free and there are four
+        declaration sites, not "every edge".
+    - field: effect_class taxonomy
+      why: >
+        Six classes, two with empty bodies, and a node pointed `barred_by` at
+        one of the empty ones, so it barred nothing. The populated set is three
+        target states plus one action, which needs no taxonomy.
+    - field: "policy: no-automated-rejection"
+      why: >
+        Its own provenance line admitted it was `by: ['human']` restated. Four
+        edges already carry that. See `governance` for the part that is real.
+
+# =============================================================================
+# BINDING
+# =============================================================================
+
+binding:
+  scope: application
+  pins: [definition_name, version]
+  on_definition_change: continue_on_pinned_version
+  migration: explicit_audited_action_with_affected_preview
+  selection:
+    by: requisition
+    field: requisition.workflow            # provenance: ref (WorkflowRequisitionConfig). We have no field.
+    default: retail-frontline-hire@1
+
+owners:
+  system:   { label: "Deterministic software",  judgement: false }
+  agent:    { label: "AI agent",                judgement: "advisory only" }
+  human:    { label: "A named person",          judgement: true }
+  external: { label: "Somebody outside",        judgement: "not ours" }
+
+# =============================================================================
+# CONDITIONS
+#
+# Named predicates. Referenced by `guard:` on an edge and `preconditions:` on
+# an activity, both of which already exist in both systems. This replaces
+# draft 1's `policies` block and is strictly smaller.
+# =============================================================================
+
+conditions:
+
+  # -- eligibility, provenance: ours (GUARDS in workflow.js) ------------------
+  eligibilityPassed:          { expr: "eligibility.passed AND NOT eligibility.holdForPerson", provenance: ours }
+  eligibilityFailed:          { expr: "NOT eligibility.passed AND NOT eligibility.holdForPerson", provenance: ours }
+  eligibilityHeldForPerson:   { expr: "eligibility.holdForPerson", provenance: ours,
+                                note: "Not a guard in our code. The hold is expressed by both auto edges failing, which leaves the application parked at ELIGIBILITY_REVIEW with a blocking exception. Named here because a definition has to say why nothing fired." }
+  allRequiredScreeningsDone:  { expr: "every required screening on this application has status complete", provenance: ours }
+  allSearchesReturned:        { expr: "every search on the check has returnedAt set", provenance: ours }
+  preShiftTasksDone:          { expr: "every task in pre_shift_tasks has status done", provenance: ours }
+  thirtyDaysElapsed:          { expr: "now - started_at >= 30d", provenance: ours }
+  sixtyDaysElapsed:           { expr: "now - started_at >= 60d", provenance: ours }
+  ninetyDaysElapsed:          { expr: "now - started_at >= 90d", provenance: ours }
+
+  # -- the E-Verify adverse action bar --------------------------------------
+  # One condition, five enforcement points, one name. This is the whole of what
+  # draft 1 needed a policy engine for.
+  noAdverseActionBar:
+    provenance: ours                # workflow.js adverseActionBlock:622, blockShiftRemoval:636
+    pack: us-federal
+    law: "E-Verify: nothing adverse is lawful while a tentative nonconfirmation is contested."
+    expr: "application.everify.decision != 'contesting'"
+    lifts_when: "the case reaches a Final Nonconfirmation"
+    enforced_at:
+      - { kind: edge,     target: end_rejected,   note: "any actor" }
+      - { kind: edge,     target: end_terminated,  note: "any actor" }
+      - { kind: edge,     target: end_withdrawn,   note: "only the by:[human] edge. See below." }
+      - { kind: activity, target: shift.remove,    note: "not an edge at all. A precondition." }
+    actor_sensitivity_note: >
+      Withdrawal needs two edges, not a policy with an actor list. A candidate
+      choosing to walk away is their own decision. A manager marking somebody
+      withdrawn is the obvious back door out of this rule. So:
+        end_withdrawn  by: [external]  guard: none
+        end_withdrawn  by: [human]     guard: noAdverseActionBar
+      Our schema already carries two edges sharing a from and a to that differ
+      only in `by`, for the rehire hold, so this is a pattern in production
+      rather than a proposal.
+    refusal_semantics:
+      leaves_state_unchanged: true
+      returns: guard_failed
+      reason_from: guardReason
+      # A failed guard already refuses the acting actor, gives a human-readable
+      # reason, and does not move the candidate. That is exactly the behaviour
+      # wanted, and draft 1's gate-versus-policy distinction collapsed anyway
+      # the moment it wrote `lifts_when`: "never while X" and "not yet" are the
+      # same claim.
+    audit:
+      action: transition.refused
+      outcome: refused
+      record: [actor, actor_type, from, to, guard, reason, at]
+      surface_includes_time_remaining: true    # business days to the 8-day mark
+    named_but_unenforced:
+      - withhold_or_reduce_pay
+      - suspend
+      - delay_training
+      # provenance: neither. The law bars these and we model none of them, so
+      # they are listed to be honest rather than annotated onto nodes. Draft 1
+      # attached a bar to a node for delayed training and the class it pointed
+      # at was empty, which barred nothing.
+
+# =============================================================================
+# GOVERNANCE
+#
+# The part of draft 1's `no-automated-rejection` policy that was real. The rule
+# itself is configuration: `by: [human]` on four edges. What is NOT
+# configuration is who may change that. Borrowed from hrX section 12, which
+# splits the knobs three ways.
+# =============================================================================
+
+governance:
+  open:
+    - stage sequence, stage owner, reminder cadence, SLA thresholds
+    - rubric version per screening stage
+    - document checklist per role
+  requires_approval:
+    - auto-advance thresholds
+  requires_approval_and_immutable_log:
+    - "`by` on any edge reaching REJECTED, TERMINATED or WITHDRAWN"
+    - "`guard` on any edge carrying noAdverseActionBar"
+    - eligibility rule set membership
+  rationale: >
+    Three independent implementations put CANDIDATE REJECTION behind a named
+    person. Our recommendation enum has no reject value and both decision edges
+    are by:['human']. IndiGo ships it as solution principle 7 and repeats it at
+    gate G-DOC: "Nothing here ever auto-rejects."
+    Two corrections to how draft 1 stated this, both of which narrow the claim.
+    hrX is the weakest of the three: it says auto-reject almost never and then
+    provides an auto-reject threshold as a governed configuration knob, so it
+    governs the thing rather than prohibiting it. And TERMINATION has only one
+    implementation, ours, because the reference funnel ends at induction and
+    has no employment to end.
+    So: rejection behind a person is well evidenced. Termination behind a
+    person is our position alone. Neither is a platform primitive. Both are
+    configuration values that must not be quietly editable, and the governance
+    tier is what makes a widened `by` list visible rather than silent.
+
+# =============================================================================
+# ACTIVITY REGISTRY
+# Their ACTIVITY node resolves an implementation from a registry. Ours resolves
+# named effects from EFFECTS in workflow.js. All fourteen of their registered
+# types are IndiGo verbs, so none of these is shared: the node type is the
+# shared thing, not the registry.
+# =============================================================================
+
+activities:
+  application.capture:      { owner: system, provenance: neither, note: "No runtime writer on either side that we can quote. Seed only, ours." }
+  eligibility.evaluate:     { owner: system, provenance: ours,    effect: recordEligibility, model: forbidden }
+  rehire.match:             { owner: system, provenance: ours,    effect: matchPriorEmployment, scope: own_tenant_only }
+  screening.conduct:        { owner: agent,  provenance: ours,    effect: startScreening }
+  screening.evaluate:       { owner: agent,  provenance: both,    effect: completeScreening, records: AiActionRecord,
+                              ref_quote: "documents.evaluate, application.autoApprove (solutioning.md 8.2)" }
+  interview.schedule:       { owner: system, provenance: neither }
+  offer.create:             { owner: system, provenance: ours,    effect: createOffer }
+  offer.send:               { owner: system, provenance: both,    effect: sendOffer, channels: [email, sms],
+                              ref_quote: "sf.extendOffer (solutioning.md 8.2)" }
+  offer.chase:              { owner: agent,  provenance: both,    ref_quote: "offer_reminder agent, OfferAcceptReminderPoller (9.1, 16.1)" }
+  bgcheck.order:            { owner: system, provenance: both,    effect: orderBackgroundCheck, ref_quote: "bgv.initiate (8.2)" }
+  bgcheck.close:            { owner: system, provenance: ours,    effect: closeBackgroundCheck }
+  fcra.pre_adverse_notice:  { owner: human,  provenance: neither, note: "adverseProcess sets stage pre_adverse_pending with automated:false. The notice itself is not built." }
+  fcra.adverse_notice:      { owner: human,  provenance: neither }
+  onboarding.fan_out:       { owner: system, provenance: ours,    effect: fanOutParallelWork }
+  everify.create_case:
+    owner: system
+    provenance: ours
+    simulated: true
+    vendor: embedded
+    requires: case_state_exposed
+    correction: >
+      Draft 1 tagged this `ref`. E-Verify appears zero times in solutioning.md,
+      so that was fabricated and it is the exact error class this field exists
+      to prevent. The first correction then over-corrected to `neither`. It is
+      `ours`: a simulated adapter op at connectors/index.js:81, actually called
+      from tick.js:190, plus an `everify` task key in ONBOARDING_TASKS. The
+      adapter is simulated, which is what `simulated: true` records.
+  shift.schedule:           { owner: system, provenance: ours,    effect: scheduleFirstShift }
+  shift.remove:             { owner: human,  provenance: ours,    preconditions: [noAdverseActionBar] }
+  start.record:             { owner: system, provenance: ours,    effect: recordStart }
+  checkin.conduct:          { owner: agent,  provenance: ours,    effect: checkIn }
+  termination.record:       { owner: human,  provenance: ours,    effect: recordTermination }
+  withdrawal.record:        { owner: system, provenance: ours,    effect: recordWithdrawal }
+
+# =============================================================================
+# THE GRAPH
+# =============================================================================
+
+nodes:
+
+  - id: start
+    type: START
+    next: s1_application
+
+# ---------------------------------------------------------------- HIRE -------
+
+  - id: s1_application
+    type: ACTIVITY
+    step: 1
+    name: "Application captured"
+    control: CONTROLLABLE
+    owner: system
+    activity: application.capture
+    inputs: [requisition_id, store_id, source, candidate_fields]
+    outputs: [application_id, candidate_id, applied_at]
+    completes_when: "an application row exists with appliedAt set"
+    fails_when: "requisition closed, or a required field absent"
+    parallelisable: false
+    external_wait: false
+    raises_exception: false
+    audit: [application.received]
+    edges:
+      - { to: s2_eligibility, by: [system], auto: true }
+
+  - id: s2_eligibility
+    type: ACTIVITY
+    step: 2
+    name: "Eligibility on hard rules"
+    control: CONTROLLABLE
+    owner: system
+    activity: eligibility.evaluate
+    # Five deterministic rules. A model is forbidden here and there is a test
+    # that reads the source to prove none runs. Thresholds come from the
+    # requisition row, so they are already data.
+    rules:
+      - { key: min_age,            threshold_from: requisition.minAge }
+      - { key: right_to_work,      threshold_from: null, note: "declared, not verified. Verification is steps 11 and 12." }
+      - { key: availability,       threshold_from: requisition.requiredSlots }
+      - { key: distance,           threshold_from: requisition.maxDistanceMiles }
+      - { key: rehire_eligibility, threshold_from: tenant_policy, calls: rehire.match }
+    inputs: [candidate, requisition, store, prior_employment]
+    outputs: [eligibility.results, eligibility.passed, eligibility.holdForPerson, rehire]
+    completes_when: "all five rules evaluated and recorded on the application"
+    fails_when: "never. It produces a verdict, and a verdict is not a failure."
+    parallelisable: false
+    external_wait: false
+    raises_exception: "rehire_flag, when the lookup returns a do-not-rehire record"
+    audit: [eligibility.evaluated, rehire.matched]
+    # Three edges out, exactly as in schema.js. The hold edge is not a rejection.
+    edges:
+      - { to: split_screening, by: [system], auto: true, guard: eligibilityPassed }
+      - { to: end_ineligible,  by: [system], auto: true, guard: eligibilityFailed }
+      - { to: h2_rehire_review, by: [system], auto: true, guard: eligibilityHeldForPerson }
+
+  # A do-not-rehire match does NOT auto-reject. It stops the application where
+  # it stands and puts it in front of a person, because the record may be wrong
+  # and the only way to find out is to ask somebody who was there.
+  - id: h2_rehire_review
+    type: HRSS_TASK
+    step: 2
+    name: "Prior record review"
+    control: CONTROLLABLE
+    owner: human
+    actor: field_hr
+    inputs: [rehire.record, rehire.confidence, eligibility.holdReason]
+    outputs: [rehireReview.outcome, rehireReview.reason, rehireReview.by]
+    completes_when: "a named person upholds or overrides, with a reason"
+    fails_when: "never. It waits, and the exception carries blocksProgress: true."
+    reason_required: true
+    parallelisable: false
+    external_wait: false
+    audit: [rehire.upheld, rehire.overridden, exception.resolved]
+    # Both exits by:[human] only. This is the enforceable form of "a person decides".
+    edges:
+      - { to: end_ineligible,  by: [human], effect: resolveHold, outcome: uphold }
+      - { to: split_screening, by: [human], effect: resolveHold, outcome: override }
+
+  # --- Steps 3, 4 and 5 -----------------------------------------------------
+  # NOT sequential, and draft 1 had this wrong. createScreening makes an agent
+  # screening always, plus a manager interview where the requisition asks for
+  # one. Both are screenings on the same application, and ONE AND-guard
+  # (allRequiredScreeningsDone) joins them. So the interview is a second member
+  # of a parallel set, not a stage that follows the screening.
+  - id: split_screening
+    type: PARALLEL_SPLIT
+    step: 3
+    covers_steps: [3, 4, 5]
+    name: "Screening set"
+    control: CONTROLLABLE
+    owner: system
+    mode: ALL
+    members:
+      - { key: agent_screen,      required: always,                                 node: s3_screening }
+      - { key: manager_interview, required: "requisition.requiresManagerInterview", node: s4_schedule }
+    # Where a role does not need an interview, steps 4 and 5 are honestly
+    # marked not-required rather than skipped silently.
+    audit: [screening.created]
+    next: join_screening
+
+  - id: s3_screening
+    type: ACTIVITY
+    step: 3
+    name: "Behavioural screening"
+    control: CONTROLLABLE
+    owner: agent
+    activity: screening.conduct
+    then: screening.evaluate
+    inputs: [candidate.answers, requisition.criteria, requisition.phrase_bank, eligibility]
+    outputs:
+      - screening.transcript
+      - evaluation.score
+      - evaluation.recommendation      # advance | review | insufficient_evidence
+      - evaluation.evidence            # cited per criterion
+      - evaluation.confidence
+      - ai_action_record               # provider, model, promptVersion, inputRefs, usage
+    recommendation_enum: [advance, review, insufficient_evidence]
+    # There is deliberately no reject value, enforced in the schema and again
+    # in the validator.
+    chain_of_thought: not_requested_and_not_stored
+    completes_when: "this screening reaches status complete"
+    fails_when: "the model reply fails schema validation. Then it is a visible failure and a blocking exception, not a half-populated evaluation."
+    on_model_absent: "deterministic phrase-bank rubric, stamped mode: deterministic-fallback, printing 'No model ran.'"
+    parallelisable: true
+    external_wait: false
+    raises_exception: "evaluation_failed (warn, blocks), screening_concern (warn, does not block)"
+    audit: [screening.started, screening.evaluated, llm.called]
+    edges:
+      - { to: join_screening, by: [system, agent, human], guard: allRequiredScreeningsDone, effect: completeScreening }
+
+  - id: s4_schedule
+    type: ACTIVITY
+    step: 4
+    name: "Interview scheduled"
+    control: CONTROLLABLE
+    owner: system
+    activity: interview.schedule
+    provenance: neither
+    inputs: [candidate.availability, interviewer.availability, store]
+    outputs: [interview.slot, calendar_ref]
+    completes_when: "a slot is written and confirmed"
+    fails_when: "no overlapping availability inside the window"
+    parallelisable: true
+    external_wait: false
+    audit: [interview.scheduled, interview.rescheduled]
+    edges:
+      - { to: s5_interview, by: [system], auto: true }
+
+  - id: s5_interview
+    type: HRSS_TASK
+    step: 5
+    name: "Interview happens, or no-show"
+    control: CONTROLLABLE
+    owner: human
+    actor: store_manager
+    inputs: [interview.slot, screening.evaluation]
+    outputs: [interview.outcome, interview.notes]
+    completes_when: "the interviewer records an outcome"
+    fails_when: "the candidate does not attend"
+    parallelisable: true
+    external_wait: false
+    accompanied_by: [t5_reminder]
+    audit: [interview.held, interview.no_show]
+    edges:
+      - { to: join_screening, by: [human], guard: allRequiredScreeningsDone }
+
+  - id: t5_reminder
+    type: TIMER
+    step: 5
+    name: "Interview reminder"
+    owner: agent
+    provenance: neither
+    fires_at: "interview.slot - 24h, then - 2h"
+    on_fire: { activity: offer.chase, channel: [sms] }
+    audit: [communication.sent]
+
+  - id: join_screening
+    type: PARALLEL_JOIN
+    step: 5
+    name: "Screening set complete"
+    owner: system
+    joins: [s3_screening, s5_interview]
+    guard: allRequiredScreeningsDone
+    on_one_branch_complete: "nothing. The set is not done until every required member is."
+    audit: [screening.complete]
+    edges:
+      - { to: s6_decision, by: [system, agent, human], auto: true, guard: allRequiredScreeningsDone }
+    # The agent may advance a candidate to a decision. That is as far as it goes.
+
+  # --- Step 6. THE HUMAN DECISION POINT -------------------------------------
+  - id: s6_decision
+    type: HRSS_TASK
+    step: 6
+    name: "Hire or reject"
+    control: CONTROLLABLE
+    owner: human
+    actor: store_manager
+    # This node is why the product is a regulated automated employment decision
+    # tool in New York City and, since October 2025, in California, where a
+    # system that merely facilitates a human decision is in scope.
+    inputs:
+      - evaluation.score
+      - evaluation.evidence
+      - evaluation.recommendation
+      - eligibility.results
+      - interview.outcome            # where one exists
+      - rehire.record                # where one exists
+    outputs: [decision.outcome, decision.by, decision.at, decision.reason]
+    completes_when: "a named person records a decision"
+    fails_when: "never. It waits, and the wait is visible with an age on it."
+    parallelisable: false
+    external_wait: false
+    assistant_may:
+      - prepare_and_summarise
+      - rank_and_prioritise
+      - advance_to_this_node
+      - request_confirmation_from_a_named_person
+    assistant_may_not:
+      - approve
+      - reject
+      - satisfy_the_confirmation_on_its_own_behalf
+    audit: [decision.recorded, transition.refused]
+    # by:[human] on both exits is the enforceable rule. No model, no rule and no
+    # bulk action without a named person. Changing either `by` list requires
+    # approval and an immutable log. See `governance`.
+    edges:
+      - { to: s7_offer,      by: [human], effect: recordDecision, outcome: approved }
+      - { to: end_rejected,  by: [human], effect: recordDecision, outcome: rejected, guard: noAdverseActionBar }
+
+  # --- Step 7 ---------------------------------------------------------------
+  - id: s7_offer
+    type: ACTIVITY
+    step: 7
+    name: "Offer made"
+    control: CONTROLLABLE
+    owner: system
+    activity: offer.create
+    then: offer.send
+    inputs: [decision, requisition.rate, store, template_id]
+    outputs: [offer.id, offer.sent_at, offer.expires_at, communication_rows]
+    approval_required:
+      when: "offer.rate > requisition.band_max"
+      approvers: [pay_rate_authority]
+      provenance: neither
+      note: >
+        Their ApprovalRequest entity exists and nothing in their production
+        creates one. Ours is not modelled at all. Same gap, differently shaped.
+    completes_when: "the offer is sent and the send is recorded"
+    fails_when: "the messaging adapter refuses"
+    parallelisable: false
+    external_wait: false
+    raises_exception: "connector_error"
+    audit: [offer.created, offer.sent, communication.sent]
+    edges:
+      - { to: s8_response, by: [system], auto: true }
+      - { to: s8_response, by: [human], effect: sendOffer }
+
+  # --- Step 8 ---------------------------------------------------------------
+  - id: s8_response
+    type: CANDIDATE_TASK
+    step: 8
+    name: "Offer accepted, or goes quiet"
+    control: EXTERNAL              # the candidate's clock, not ours
+    owner: external
+    inputs: [offer.id]
+    outputs: [offer.response, offer.responded_at, fcra.disclosure_signed_at]
+    # The FCRA standalone disclosure and authorisation are captured here, which
+    # is what lets step 9 start the moment acceptance lands.
+    completes_when: "the candidate accepts or declines. NOT when the offer was sent."
+    fails_when: "silence to the expiry"
+    parallelisable: false
+    external_wait: true
+    raises_exception: "offer_quiet (crit, blocks)"
+    accompanied_by: [t8_chase, t8_expiry]
+    audit: [offer.accepted, offer.declined, fcra.disclosure_captured]
+    edges:
+      - { to: split_post_offer, by: [external, human], effect: acceptOffer,  outcome: accepted }
+      - { to: end_declined,     by: [external, human], effect: declineOffer, outcome: declined }
+
+  - id: t8_chase
+    type: TIMER
+    step: 8
+    name: "Offer chase"
+    owner: agent
+    provenance: ours
+    fires_at: "offer.sent_at + 24h, repeating"
+    on_fire: { activity: offer.chase, channel: [sms] }
+    audit: [communication.sent]
+
+  - id: t8_expiry
+    type: TIMER
+    step: 8
+    name: "Offer expiry"
+    owner: system
+    provenance: ours
+    fires_at: "offer.expires_at"
+    on_fire: { raise_exception: offer_quiet, severity: crit, blocks_progress: true, owner: human }
+    # Deliberately raises an exception rather than auto-declining. Silence is
+    # not a decision, and treating it as one loses a hire a phone call saves.
+    audit: [exception.raised]
+
+# ------------------------------------------------- THE PARALLELISATION -------
+# This split is the retail thesis made mechanical. Everything after acceptance
+# that does not depend on something else starts now, together.
+#
+# What makes it lawful and what makes it safe are different questions:
+#   the check may be ordered at acceptance because the FCRA disclosure and
+#     authorisation were captured at step 8;
+#   the onboarding forms may be issued at acceptance because none of them
+#     requires the check to have returned;
+#   the first shift may NOT be placed until both branches settle, which is what
+#     the join enforces.
+# -----------------------------------------------------------------------------
+
+  - id: split_post_offer
+    type: PARALLEL_SPLIT
+    step: 9
+    name: "Post-acceptance fan-out"
+    owner: system
+    activity: onboarding.fan_out
+    mode: ALL
+    branches: [branch_check, branch_onboarding]
+    audit: [parallel.fanned_out]
+    records: [sequential_estimate_ms, critical_path_estimate_ms]
+    estimate_note: >
+      Both figures are estimates over the same eleven-task set with the same
+      per-task constants, so their ratio does not vary between applications.
+      Observed wall clock is recorded separately and is not comparable to
+      either. Neither figure is a measurement.
+
+  # --- Branch A. Steps 9 and 10. EXTERNAL ----------------------------------
+  - id: branch_check
+    type: ACTIVITY
+    step: 9
+    name: "Background check ordered"
+    control: CONTROLLABLE          # ordering is ours. D-014: we never perform one.
+    owner: system
+    activity: bgcheck.order
+    preconditions:
+      - "fcra.disclosure_signed_at is set"          # standalone document, 1681b(b)(2)(A)
+      - "fcra.authorisation_signed_at is set"
+    inputs: [candidate, store.counties, requisition.search_package]
+    outputs: [check.id, check.external_ref, check.searches]
+    completes_when: "the agency acknowledges the order and returns a reference"
+    fails_when: "the adapter refuses. Retryable or not, and the record says which."
+    parallelisable: true
+    external_wait: false
+    raises_exception: "connector_error"
+    audit: [check.ordered, connector.called]
+    edges:
+      - { to: w10_check, by: [system, human], auto: true }
+
+  - id: w10_check
+    type: EVENT_WAIT
+    step: 10
+    name: "Check comes back clear"
+    control: EXTERNAL              # we do not own this clock and cannot compress it
+    owner: external
+    waiting_on: agency
+    inputs: [check.external_ref]
+    outputs: ["check.searches[].result", check.outcome]
+    signal: "every search has returnedAt set"
+    completes_when: "all searches returned. NOT when the order was placed."
+    fails_when: "never completes on its own. It waits."
+    parallelisable: true
+    external_wait: true
+    raises_exception: "check_delay (warn, does not block)"
+    accompanied_by: [t10_delay]
+    audit: [check.returned, connector.called]
+    edges:
+      - { to: d10_route, by: [external, system], guard: allSearchesReturned, effect: closeBackgroundCheck }
+
+  - id: t10_delay
+    type: TIMER
+    step: 10
+    name: "Check delay surfacing"
+    owner: system
+    provenance: ours
+    fires_at: "check.ordered_at + 5d"
+    on_fire: { raise_exception: check_delay, severity: warn, blocks_progress: false }
+    # Warns and does not block, because a slow agency is not a reason to stop
+    # the onboarding branch that has nothing to do with it.
+    audit: [exception.raised]
+
+  # CORRECTION TO DRAFT 1. Draft 1 claimed our implementation auto-advances a
+  # check with a record found, and used that as its one incrimination of our own
+  # code. That was a misreading. closeBackgroundCheck sets
+  # outcome = 'adverse_possible' and raises adverse_review with
+  # blocksProgress: true, and settle() returns immediately when a blocking
+  # exception exists. So the advance IS stopped, by an exception rather than by
+  # a transition guard.
+  #
+  # The real observation is narrower and still worth making: the enforcement is
+  # a blocking exception, not a branch in the graph, so the FCRA sequence is
+  # not expressed as a path anybody can read off the definition. Writing it as
+  # nodes is what this decision and the three below it do.
+  - id: d10_route
+    type: DECISION
+    step: 10
+    name: "Check outcome routing"
+    owner: system
+    provenance: neither
+    enforced_today_by: "adverse_review exception, crit, blocksProgress true"
+    branches:
+      - { when: "check.outcome == 'clear'",            to: join_pre_shift }
+      - { when: "check.outcome == 'adverse_possible'", to: h10_pre_adverse }
+
+  - id: h10_pre_adverse
+    type: HRSS_TASK
+    step: 10
+    name: "Pre-adverse notice"
+    control: CONTROLLABLE
+    owner: human
+    actor: field_hr
+    provenance: neither
+    law: "15 U.S.C. 1681b(b)(3)"
+    inputs: [check.report, check.searches_with_records]
+    outputs: [pre_adverse.sent_at, pre_adverse.enclosures]
+    requires_enclosures: [copy_of_the_report, summary_of_rights]
+    completes_when: "the notice is sent with both enclosures recorded"
+    audit: [fcra.pre_adverse_sent]
+    edges:
+      - { to: t10_gap, by: [human] }
+
+  - id: t10_gap
+    type: TIMER
+    step: 10
+    name: "Reasonable response gap"
+    control: EXTERNAL
+    owner: external
+    duration: tenant_policy        # no fixed number of days in the statute
+    # "Whatever is reasonable, and it cannot be collapsed." The duration is
+    # tenant policy precisely because the statute sets none, so hardcoding a
+    # number here would be inventing law.
+    audit: [fcra.gap_started, fcra.candidate_responded]
+    edges:
+      - { to: h10_adverse,   by: [system], auto: true, on: timer_expired }
+      - { to: join_pre_shift, by: [human], on: candidate_disputed, note: "a dispute reopens the record" }
+
+  - id: h10_adverse
+    type: HRSS_TASK
+    step: 10
+    name: "Adverse action notice"
+    owner: human
+    actor: field_hr
+    provenance: neither
+    inputs: [pre_adverse, candidate.response]
+    outputs: [adverse.sent_at, decision.outcome]
+    audit: [fcra.adverse_sent, decision.recorded]
+    edges:
+      - { to: end_rejected, by: [human], guard: noAdverseActionBar }
+
+  # --- Branch B. Steps 11 to 14. The task DAG ------------------------------
+  # Eleven tasks, four dependency edges, two deferred until after day one.
+  # Nine of the eleven gate the first shift. This is where the compression is,
+  # AND it is the one place the ten node types are genuinely insufficient: the
+  # dependency edges make this a DAG, not a fork-join. See contract_delta.
+  - id: branch_onboarding
+    type: PARALLEL_SPLIT
+    step: 11
+    covers_steps: [11, 12, 13, 14]
+    # Steps 13 and 14 have no node of their own on purpose. They are tasks
+    # inside this region rather than sequential stages, which is the whole
+    # point: training, uniform, badge, payroll and systems access are not a
+    # phase that follows the forms, they start at the same moment.
+    name: "Onboarding fan-out"
+    control: CONTROLLABLE
+    owner: system
+    mode: ALL
+    region_kind: dependency_graph   # NOT independent branches. The gap.
+    tasks:
+      # step 11. All four start together. No dependencies.
+      - { key: i9_s1,      step: 11, type: CANDIDATE_TASK, owner: system, actor: candidate, needs: [],                  est_ms: 720000,    law: "On or before the first day of work for pay. 8 CFR 274a.2(b)(1)(i)(A)." }
+      - { key: w4,         step: 11, type: CANDIDATE_TASK, owner: system, actor: candidate, needs: [],                  est_ms: 360000 }
+      - { key: direct_dep, step: 11, type: CANDIDATE_TASK, owner: system, actor: candidate, needs: [],                  est_ms: 300000 }
+      - { key: policies,   step: 11, type: CANDIDATE_TASK, owner: system, actor: candidate, needs: [],                  est_ms: 540000 }
+      # step 13. Independent of everything. Starts at fan-out.
+      - { key: training,   step: 13, type: CANDIDATE_TASK, owner: system, actor: candidate, needs: [],                  est_ms: 207360000 }
+      # step 14. Two independent, two chained.
+      - { key: uniform,    step: 14, type: ACTIVITY,       owner: system, actor: system,    needs: [],                  est_ms: 21600000 }
+      - { key: badge,      step: 14, type: HRSS_TASK,      owner: human,  actor: manager,   needs: [],                  est_ms: 14400000,
+          note: "The one part of this map with no public vendor documentation anywhere, and it sits on the critical path to day one." }
+      - { key: payroll,    step: 14, type: ACTIVITY,       owner: system, actor: system,    needs: [w4, direct_dep],    est_ms: 2700000 }
+      - { key: systems,    step: 14, type: ACTIVITY,       owner: system, actor: system,    needs: [payroll],           est_ms: 7200000 }
+      # Deferred. These cannot be discharged before the first day of work for
+      # pay, so excluding them from the pre-shift gate is correctness.
+      - { key: i9_s2,      step: 11, type: HRSS_TASK,      owner: human,  actor: manager,   needs: [i9_s1],  after_start: true, est_ms: 600000,
+          law: "Within 3 business days of the first day of work for pay. A named person examines the original documents. No model can sign this." }
+      - { key: everify,    step: 12, type: ACTIVITY,       owner: system, actor: system,    needs: [i9_s2],  after_start: true, est_ms: 240000,
+          law: "No later than the third business day after the employee starts work for pay." }
+    est_ms_note: "The real estMs constants from ONBOARDING_TASKS. Estimates, not measurements."
+    outputs: [task_rows, per_task_started_at, per_task_done_at]
+    completes_when: "every task not marked after_start is done"
+    parallelisable: true
+    external_wait: false
+    audit: [task.created, task.started, task.completed, task.blocked]
+    next: join_pre_shift
+
+# ---------------------------------------------------------------- JOIN -------
+
+  - id: join_pre_shift
+    type: PARALLEL_JOIN
+    step: 15
+    name: "Ready for a first shift"
+    owner: system
+    joins: [branch_check, branch_onboarding]
+    guard: "preShiftTasksDone AND check.outcome == 'clear'"
+    pre_shift_tasks: [i9_s1, w4, direct_dep, policies, training, uniform, badge, payroll, systems]
+    # Nine of eleven, verified against PRE_SHIFT_TASKS. i9_s2 and everify are
+    # excluded because they are after_start obligations, and including them
+    # parked every candidate here.
+    on_one_branch_complete: >
+      Nothing. The other branch keeps running and the interface shows which one
+      is outstanding, with an age on it. A branch that finishes early does not
+      make the candidate ready and must not read as though it did.
+    on_branch_blocked: >
+      The exception surfaces against the branch, not against the candidate. A
+      blocking exception stops the automatic advance and never stops a person.
+    audit: [parallel.joined, ready_for_shift]
+    edges:
+      - { to: s15_shift, by: [system], auto: true, guard: preShiftTasksDone }
+
+# ------------------------------------------------------------- ONBOARD -------
+
+  - id: s15_shift
+    type: ACTIVITY
+    step: 15
+    name: "First shift scheduled"
+    control: CONTROLLABLE
+    owner: system
+    activity: shift.schedule
+    inputs: [store.schedule, candidate.availability, ready_at]
+    outputs: [shift.id, shift.starts_at, shift.notice_days, shift.premium_payable]
+    constraint:
+      law: "Fair workweek advance notice, roughly fourteen days in covered cities."
+      behaviour: "report the constraint rather than silently writing the shift"
+      # The adapter returns premiumPayable when notice is under fourteen days.
+      # A first shift is not ours to place freely.
+    completes_when: "the shift is written and the notice window recorded"
+    fails_when: "the scheduling adapter refuses"
+    parallelisable: false
+    external_wait: false
+    raises_exception: "connector_error"
+    audit: [shift.scheduled]
+    edges:
+      - { to: w16_day_one, by: [system, human], effect: scheduleFirstShift }
+
+  - id: w16_day_one
+    type: EVENT_WAIT
+    step: 16
+    name: "Day one: shows up, or does not"
+    control: EXTERNAL
+    owner: external
+    waiting_on: candidate
+    signal: "attendance recorded"
+    outputs: [started_at]
+    completes_when: "the manager records attendance. NOT when the shift was written."
+    fails_when: "the shift passes with nobody there"
+    parallelisable: false
+    external_wait: true
+    audit: [start.recorded, day_one.no_show]
+    edges:
+      - { to: split_after_start, by: [external, human], effect: recordStart }
+
+  # Two independent regions after day one, and they do NOT converge. Draft 1
+  # had a mode-ALL split whose branches ran into each other with no join, which
+  # was malformed. The I-9 and E-Verify obligations run to their own terminal
+  # state; the activation track runs to day ninety. Neither waits for the other.
+  - id: split_after_start
+    type: PARALLEL_SPLIT
+    step: 16
+    name: "After day one"
+    owner: system
+    mode: ANY                      # no join. Two independent tracks.
+    branches: [branch_i9_s2, branch_activate]
+    join: none
+    join_note: >
+      Deliberately no PARALLEL_JOIN. The statutory track and the activation
+      track have no common successor: one ends at an E-Verify case state, the
+      other at day ninety. Forcing a join would make day ninety wait on a
+      government department.
+    audit: [parallel.fanned_out]
+
+  # -- statutory track ------------------------------------------------------
+  - id: branch_i9_s2
+    type: HRSS_TASK
+    step: 11
+    name: "Form I-9, Section 2"
+    control: CONTROLLABLE
+    owner: human
+    actor: manager
+    inputs: [i9_s1, candidate.original_documents]
+    outputs: [i9_s2.signed_at, i9_s2.by]
+    deadline: "3 business days from the first day of work for pay"
+    law: "8 CFR 274a.2(b)(1)(ii)"
+    completes_when: "a named person examines the original documents and signs"
+    human_required_reason: "Signed under penalty of perjury. No model can sign that."
+    audit: [i9_s2.signed]
+    edges:
+      - { to: s12_everify, by: [human] }
+
+  - id: s12_everify
+    type: ACTIVITY
+    step: 12
+    name: "E-Verify case created"
+    control: CONTROLLABLE          # creating is ours
+    owner: system
+    activity: everify.create_case
+    provenance: neither
+    vendor: embedded
+    vendor_hard_requirement: >
+      The vendor must expose the E-Verify case state. Without it we cannot
+      drive the clocks and cannot enforce noAdverseActionBar, which makes the
+      vendor unusable regardless of anything else it does. D-022.
+    deadline: "no later than the third business day after the employee starts work for pay"
+    inputs: [i9_s1, i9_s2]
+    outputs: [everify.case_ref, everify.created_at]
+    completes_when: "the case exists and its state is readable"
+    audit: [everify.case_created]
+    edges:
+      - { to: w12_case_state, by: [system], auto: true }
+
+  - id: w12_case_state
+    type: EVENT_WAIT
+    step: 12
+    name: "E-Verify case state"
+    control: EXTERNAL
+    owner: external
+    waiting_on: government
+    signal: "case state changes"
+    outputs: [everify.case_status, everify.decision, everify.tnc_issued_at, everify.referred_at]
+    completes_when: "the case reaches a terminal state. NOT when the case was created."
+    external_wait: true
+    raises_exception: "everify_mismatch (crit, does not block)"
+    audit: [everify.state_changed, exception.raised]
+    branches:
+      - { when: "case_status == 'EMPLOYMENT_AUTHORIZED'",     to: end_authorised }
+      - { when: "case_status == 'TENTATIVE_NONCONFIRMATION'", to: h12_tnc }
+      - { when: "case_status == 'FINAL_NONCONFIRMATION'",     to: end_authorised,
+          note: "lifts noAdverseActionBar. It does not itself terminate anybody." }
+
+  - id: h12_tnc
+    type: HRSS_TASK
+    step: 12
+    name: "Mismatch: notify, refer, take the employee decision"
+    control: CONTROLLABLE
+    owner: human
+    actor: field_hr
+    inputs: [everify.tnc_issued_at]
+    outputs: [everify.decision]     # contesting | not_contesting
+    deadline: "10 federal working days from issuance"
+    deadline_note: >
+      One shared window. The employer notifies and refers inside it, and the
+      employee decision falls due on the same tenth day.
+    on_outcome_contesting:
+      sets: "application.everify.decision = 'contesting'"
+      arms_condition: noAdverseActionBar
+      # The condition is a field on the application row, which is why a guard on
+      # a distant edge can read it. Draft 1 claimed a local guard could not see
+      # this and that was wrong: guards receive the application.
+    audit: [everify.notified, everify.referred, everify.decision_recorded]
+    edges:
+      - { to: w12_case_state, by: [human], note: "back to the wait until the case resolves" }
+
+  - id: end_authorised
+    type: END
+    step: 12
+    name: "Work authorisation settled"
+    lost: false
+    audit: [everify.closed]
+
+  # -- activation track. Steps 17 to 20 -------------------------------------
+  # Mostly not ours, and the definition should say so rather than claim a
+  # visibility surface is an automation surface.
+  - id: branch_activate
+    type: HRSS_TASK
+    step: 17
+    name: "Week one training on the floor"
+    control: OBSERVED              # happens in the store. We surface, we do not drive
+    owner: human
+    actor: manager
+    inputs: [training.assigned]
+    outputs: [week_one.completed_at]
+    completes_when: "the manager records it"
+    parallelisable: true
+    external_wait: false
+    audit: [week_one.recorded]
+    edges:
+      - { to: s18_ramp, by: [human] }
+
+  - id: s18_ramp
+    type: HRSS_TASK
+    step: 18
+    name: "Ramp to working unsupervised"
+    control: OBSERVED
+    owner: human
+    actor: manager
+    outputs: [ramp.completed_at]
+    completes_when: "the manager records it"
+    audit: [ramp.recorded]
+    edges:
+      - { to: t19_tenure, by: [human] }
+
+  - id: t19_tenure
+    type: TIMER
+    step: 19
+    covers_steps: [19, 20]
+    name: "30, 60 and 90 day check-ins"
+    control: CONTROLLABLE          # the check-in is ours. The elapsing is not.
+    owner: agent
+    chain:
+      - { at: "started_at + 30d", guard: thirtyDaysElapsed, activity: checkin.conduct, state: DAY_30, by: [system] }
+      - { at: "started_at + 60d", guard: sixtyDaysElapsed,  activity: checkin.conduct, state: DAY_60, by: [system] }
+      - { at: "started_at + 90d", guard: ninetyDaysElapsed, activity: checkin.conduct, state: DAY_90, by: [system] }
+    outputs: [checkin.at, checkin.outcome]
+    audit: [checkin.conducted]
+    edges:
+      - { to: end_retained,   by: [system], guard: ninetyDaysElapsed }
+      - { to: end_terminated, by: [human], effect: recordTermination, guard: noAdverseActionBar }
+
+# ----------------------------------------------------------------- ENDS ------
+
+  - id: end_ineligible
+    type: END
+    step: 2
+    name: "Not eligible"
+    lost: true
+    reason_required: true
+    audit: [application.closed]
+
+  - id: end_rejected
+    type: END
+    step: 6
+    name: "Rejected"
+    lost: true
+    reason_required: true
+    reachable_by: [human]          # only. Governed. See `governance`.
+    guarded_by: [noAdverseActionBar]
+    audit: [decision.recorded, application.closed]
+
+  - id: end_declined
+    type: END
+    step: 8
+    name: "Offer declined"
+    lost: true
+    audit: [offer.declined, application.closed]
+
+  - id: end_withdrawn
+    type: END
+    name: "Withdrew"
+    lost: true
+    reachable_from: every_non_terminal_node
+    reachable_from_note: >
+      21 generated edges on our side, from one loop. Expressed here as a
+      property rather than 21 declarations, which is a notation convenience
+      and not a contract concept. A real definition would either generate them
+      or carry a wildcard source, and the reference vocabulary has neither.
+    # TWO edges, not one policy with an actor list.
+    edges_in:
+      - { by: [external], guard: none,               note: "the candidate's own choice" }
+      - { by: [human],    guard: noAdverseActionBar, note: "the employer recording it. The back door, closed." }
+    audit: [withdrawal.recorded]
+
+  - id: end_terminated
+    type: END
+    name: "Employment ended"
+    lost: true
+    reachable_from: [w16_day_one, t19_tenure]
+    reachable_by: [human]
+    guarded_by: [noAdverseActionBar]
+    audit: [termination.recorded]
+
+  - id: end_retained
+    type: END
+    step: 20
+    name: "Day 90, still employed"
+    lost: false
+    audit: [retained.recorded]
+
+# =============================================================================
+# REHIRE
+# A conditional acceleration, not a separate graph. It changes what the
+# onboarding tasks DO, not which nodes exist, which is why it is a task-level
+# reuse plan rather than a second path.
+# =============================================================================
+
+rehire:
+  provenance: ours                 # rules.js matchPriorEmployment, reusableSteps
+  detection:
+    activity: rehire.match
+    scope: this_customers_own_records_only
+    scope_reason: >
+      D-030. Pooling records across customers makes us a consumer reporting
+      agency under 15 U.S.C. 1681a(f), because the second employer is a third
+      party as to the first employer's records. The protection comes from the
+      furnishing-to-third-parties element, not from the transactions-and-
+      experiences exclusion, and designing against the wrong element produces a
+      design that fails. Enforced at the data layer, not in application logic.
+    identity_key: "normalised(last|first) + dob + last4(phone)"
+    identity_key_excludes: social_security_number
+    identity_key_reason: >
+      An I-9 does not require an SSN unless the employer uses E-Verify, and it
+      does not exist at application time. Collecting one earlier than necessary
+      creates a custody problem for no gain.
+    confidence:
+      exact:   "name, dob and last4 all agree"
+      partial: "name and dob agree, the phone number has changed"
+    partial_handling: >
+      A suggestion for a person to confirm, not a fact. Tune to under-merge:
+      wrongly joining two people attaches one applicant's rejection, or another
+      person's do-not-rehire flag, to somebody it does not belong to, and in
+      hiring that is a discrimination complaint rather than a bug.
+
+  policy:
+    source: tenant_and_jurisdiction_configuration
+    # Deliberately not stated as a fixed threshold. Where the source material
+    # does not establish one, it is configuration.
+    reuse_verbs: [update-and-reverify, carry-forward, retake, reactivate, fresh-order, never]
+
+  reuse_plan:
+    - key: i9_s1
+      verb: update-and-reverify
+      when: "now < prior.i9_executed_on + 3y"
+      law: "8 CFR 274a.2(c)(1)(i)"
+      law_note: >
+        Three years from the date of INITIAL EXECUTION of the previous form,
+        not from separation. Getting that wrong in either direction is a
+        paperwork violation.
+    - key: "training:*"
+      verb: carry-forward
+      when: "the certification has no expiry, or expires in the future"
+      else_verb: retake
+    - key: payroll
+      verb: reactivate
+      when: "prior.employee_id exists"
+    - key: everify
+      verb: never
+      why: "A new case is required for every new hire. E-Verify User Manual, section 2."
+    - key: bgcheck
+      verb: fresh-order
+      why: >
+        FCRA sets no shelf life, so a prior report is not unusable. This
+        customer's policy says order fresh, and policy is the constraint here,
+        not the law.
+
+  audit_required:
+    - rehire.matched                # with confidence and scope on the record
+    - rehire.reuse_applied          # per item, with the verb and the why
+    - rehire.upheld
+    - rehire.overridden             # with the reason and the named person
+  audit_reason: >
+    Every shortened path must carry the explanation for why it was shortened. A
+    collapsed journey with no record of why is indistinguishable from a skipped
+    obligation.
+
+# =============================================================================
+# EXCEPTIONS
+# The six kinds raised in demo/server/lib/, verified by grep, plus two that are
+# seeded or derived rather than raised. Draft 1 invented three names that do not
+# exist (no_show, task_blocked, decision_ageing) and missed the most important
+# real one (adverse_review).
+# =============================================================================
+
+exceptions:
+  raised_in_code:
+    rehire_flag:        { severity: crit, owner: human, blocks_progress: true,  node: h2_rehire_review,  step: 2 }
+    screening_concern:  { severity: warn, owner: human, blocks_progress: false, node: s3_screening,      step: 3 }
+    evaluation_failed:  { severity: warn, owner: human, blocks_progress: true,  node: s3_screening,      step: 3 }
+    offer_quiet:        { severity: crit, owner: human, blocks_progress: true,  node: s8_response,       step: 8 }
+    adverse_review:     { severity: crit, owner: human, blocks_progress: true,  node: d10_route,         step: 10 }
+    check_delay:        { severity: warn, owner: human, blocks_progress: false, node: w10_check,         step: 10 }
+  seeded_or_derived:
+    everify_mismatch:   { severity: crit, owner: human, blocks_progress: false, node: w12_case_state,    step: 12, provenance: "seed only" }
+    connector_error:    { step: 14, provenance: "named in the step map, no raise site in lib/" }
+    day_one_risk:       { step: 16, provenance: "named in the step map, no raise site in lib/" }
+  semantics:
+    blocks_progress: >
+      Stops the automatic advance and never stops a person. This is the
+      semantic that keeps a stuck branch from becoming a stuck candidate, and
+      it is how the FCRA adverse path is actually enforced today.
+    blocks_progress_caveat: >
+      Precisely: it stops settle(), and settle() only fires edges marked auto.
+      So a blocking exception on a node with no auto edge out is a
+      queue-priority flag rather than a block. offer_quiet at s8_response is
+      one of those: nothing was going to advance automatically from a wait on
+      the candidate. adverse_review at d10_route is a real block, because the
+      edge onward is auto. Worth stating because the field name promises more
+      than it delivers on half its uses.
+    provenance: ours
+
+# =============================================================================
+# AUDIT CONTRACT
+#
+# The event NAMES used on nodes above are this document's notation, not an
+# implemented vocabulary. Our three logs carry a free-text `action` field, so
+# any of these names is expressible and none of them is currently emitted under
+# that exact spelling. Draft 1 left roughly forty names looking like an
+# inventory of existing events, which they are not.
+# =============================================================================
+
+audit:
+  event_names_are_notation: true
+  logs:
+    workflow_events:
+      provenance: ours
+      purpose: "what moved, and the substrate every reported duration derives from"
+      append_only: true
+      fields: [id, tenantId, applicationId, candidateId, storeId, requisitionId, at, kind, state, fromState, step, owner, actorType, actor, handoff, durationMs, detail, ref]
+      kinds: [enter, work, blocked, unblock, note]
+      duration_semantics: >
+        durationMs is WORK time. Elapsed is derived from the gap between events,
+        and the difference is the queue. That distinction cannot be
+        reconstructed later, so it is captured rather than computed after the
+        fact. Note honestly: the recorded work times are largely constants and
+        deterministic spreads, faithfully recorded. The derivation is real; the
+        inputs are synthetic.
+    action_log:
+      provenance: ours
+      purpose: "who did what and why, including refusals"
+      append_only: true
+      fields: [id, tenantId, at, action, actorType, actor, subjectType, subjectId, applicationId, candidateId, why, detail, outcome, source]
+      outcomes: [ok, refused, failed]
+      sources: [ui, assistant, connector, workflow]
+      refusal_is_first_class: true
+      refusal_kinds: [not_found, illegal_transition, actor_not_permitted, guard_failed]
+      refusal_note: >
+        Four refusal kinds, each with a human-readable reason, each writing an
+        entry. A refused action is the most interesting thing an audit log
+        holds. Note that a refusal writes to this log only: no workflowEvent is
+        written, so a refused action is invisible to the funnel and to metrics.
+    ai_action_record:
+      provenance: ours
+      purpose: "every model verdict, reproducibly"
+      append_only: true
+      fields: [id, tenantId, at, purpose, mode, provider, model, promptVersion, latencyMs, inputRefs, ok, error, recommendation, confidence, usage, output]
+      chain_of_thought: never_stored
+      mode_values: [llm, deterministic-fallback]
+      honesty_rule: >
+        A fallback is never described as a model. mode is stamped on the record
+        and surfaced on every screen that shows the result.
+  override_path:
+    distinguished_action: manual_override
+    provenance: ref                # StageService.advance, solutioning.md 8.1
+    ours: absent
+    reason: >
+      An override that reads like normal progression is an override nobody can
+      find later. That distinction is worth having.
+    restated_in_graph_terms: >
+      Their version rejects a non-adjacent stage jump unless override=true,
+      which is a concept from their legacy FSM where the stage is a linear
+      enum. A graph has no notion of adjacency, so importing the rule verbatim
+      would import a referent that does not exist here. The graph equivalent is
+      narrower and cleaner: an override is an edge taken with a failing guard,
+      or an edge taken that the definition does not contain. Both are auditable
+      as manual_override, and neither needs a linear stage order.
+
+# =============================================================================
+# WHAT THIS DEFINITION DOES NOT CLAIM
+# =============================================================================
+
+not_claimed:
+  - "Nothing loads this file. It is a design artifact and no code was changed."
+  - "Six activities are provenance: neither, and nothing implements them on either side: application.capture, interview.schedule, fcra.pre_adverse_notice, fcra.adverse_notice, everify.create_case, and the approval requirement on s7_offer."
+  - "The FCRA path (d10_route, h10_pre_adverse, t10_gap, h10_adverse) exists as nodes here and as a blocking exception in our code. It is NOT a branch in our state machine, and the derived view of its three steps has done:false hardcoded."
+  - "Every audit event name on a node is this document's notation. None is an existing emitted event under that spelling."
+  - "Every connector named here is simulated on our side, and every adapter response carries mode: simulated."
+  - "No duration in this file is measured. est_ms are the real constants from ONBOARDING_TASKS, and constants are not measurements. The two parallelisation figures are estimates over the same task set, so their ratio does not vary between applications."
+  - "The 27 states and 50 transitions are code on our side, not rows. Nothing in our repository pins a definition version to an application."
+  - "There is no RBAC on our side. by:[human] currently protects against the seed replay and the test suite, not against a live agent caller, because every HTTP request builds actor.type: 'human'."
+  - "conditions and tasks[].needs are the only two additions argued as genuinely needed. Everything else added is listed in contract_delta as convenience."
+
+# =============================================================================
+# REVISION LOG
+# =============================================================================
+
+revision_log:
+  - draft: 1
+    date: 2026-09-02
+    outcome: "attacked by five independent reviewers, did not survive intact"
+  - draft: 2
+    date: 2026-09-02
+    changes:
+      - "Restored `by` on every edge. Draft 1 dropped the actor allowlist entirely, which made the definition less expressive than the code it described. This was the most damaging omission."
+      - "Replaced the `policies` block with `conditions`, a named-predicate map. Three of draft 1's arguments for a new primitive were wrong; see contract_delta.removed_from_draft_1."
+      - "Deleted the effect-class taxonomy and the no-automated-rejection policy. The first had empty classes that barred nothing; the second was `by: [human]` restated."
+      - "Added `governance`, which is the part of no-automated-rejection that was real: the rule is configuration, and who may change it is not."
+      - "Corrected everify.create_case from provenance ref to neither. E-Verify appears zero times in solutioning.md. The tag was fabricated."
+      - "Retracted the claim that our code auto-advances an adverse background check. closeBackgroundCheck raises adverse_review with blocksProgress true and settle() stops. The narrower true observation is kept."
+      - "Rewrote steps 3 to 5 as a parallel screening set joined by one AND guard, which is what createScreening and allRequiredScreeningsDone actually do. Draft 1 had them sequential."
+      - "Fixed split_after_start: mode ANY with no join, because the statutory and activation tracks have no common successor. Draft 1 had mode ALL, no join, and branches converging into each other."
+      - "Corrected the exceptions block to the six kinds actually raised plus three named elsewhere. Draft 1 invented three and omitted adverse_review."
+      - "Added contract_delta, declaring every field addition. Draft 1 claimed one extension and made about a dozen."
+      - "Named the second genuine gap: tasks[].needs is an arbitrary DAG and fork-join cannot draw it."
+      - "Marked audit event names as notation rather than letting them read as an inventory."

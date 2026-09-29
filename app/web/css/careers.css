@@ -1,0 +1,779 @@
+/* ============================================================================
+   careers.css  ·  only what the candidate-facing page needs and app.css
+                   does not already give it
+
+   WHAT THIS FILE IS FOR. app.css is an operator chrome: a three-column shell,
+   a navigation rail, an assistant column, a 38px table row. A person applying
+   for an hourly job has none of those, is probably on a phone, and is reading
+   prose rather than scanning a queue. This file is the public page's layout and
+   its components: the job row, the disclosure paragraph, the folded full
+   notice, the required-shift rows and the shift grid. Everything else is
+   borrowed.
+
+   THE REFERENCE VIEWPORT IS 390 BY 844. It was nowhere for the first three
+   weeks and every measured defect on this page followed from that: a gate
+   2,631px tall, the two required shift boxes off the right edge at x=319 and
+   x=377 inside a 324px window, an 18px tick box, and a paragraph of capitals
+   arriving as the answer to a question. No control a candidate touches is
+   smaller than var(--tap).
+
+   WHAT BREAKS WITHOUT IT. The page still works and still says everything it
+   has to say, because every colour, every type step and every primitive comes
+   from tokens.css and app.css. What is lost is the reading measure, the tap
+   targets and the shift grid, so the form becomes hard to fill on a phone,
+   which is where a frontline applicant fills it.
+
+   WHAT IS BORROWED AND NOT REDECLARED, so nobody adds a second copy:
+   `.card`, `.card-hd`, `.card-bd`, `.chip`, `.glyph`, `.btn`, `.field`,
+   `.sim`, `.sim-note`, `.fail`, `.empty`, `.table.t`, `.micro`, `.muted`,
+   `.faint`, `.prose`, `.own-*` and every `--*` token.
+
+   THE THREE ANTI-AI RULES, and how this file keeps them.
+
+   U-104, zero raw hex. There is none. Every colour below is a token, and every
+   colour token sits on a class encoding an owner (`own-human`), a tone (the
+   `--warn-*` pair on the second error voice), or an interaction state.
+
+   U-105, no two adjacent blocks share dimensions unless the data makes them.
+   There is no card grid here. The eight jobs are ONE bordered list whose rows
+   differ in height because a requisition with three required shifts is taller
+   than one with two. The filter strip is one bordered strip with two controls
+   of deliberately different widths, because store names are longer than role
+   names. The two call buttons have different flex bases, because U-92 puts the
+   browser call first and the outbound second and equal buttons would deny it.
+   The one place with equal columns is the shift grid, and there the data makes
+   them equal: seven days of the week are seven of the same thing.
+
+   U-103, elevation only on things that float. This file declares no box-shadow
+   at all. Nothing on a careers page floats. Separation is `--line` and a
+   `--surface-2` step, exactly as app.css does it.
+   ============================================================================ */
+
+/* --------------------------------------------------------- the public page ---
+   Not `.shell`. This is a document, and the only chrome is a masthead.
+   ------------------------------------------------------------------------- */
+
+.pub {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+
+  /* A 44px tap target, and this is a deliberate local departure from U-99's
+     36 to 40px row, recorded rather than quiet.
+
+     U-99 targets a short row because twenty funnel rows plus stage headers
+     have to be visible at once, and U-40's duration argument only reads if the
+     whole distribution fits one view. This page has no such row. It has a
+     person on a phone ticking thirteen checkboxes, and WCAG 2.5.5 sets 44 by
+     44 CSS pixels as the enhanced target size. So the operational density
+     stays where it belongs and the things a thumb has to hit are 44px here. */
+  --tap: 44px;
+}
+
+.pub-top {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  min-height: var(--topbar-h);
+  padding: 0 var(--s5);
+  border-bottom: 1px solid var(--line);
+  /* The one translucent surface on the page. U-103 keeps the blur on the
+     topbar, where it signals content passing behind, and this is the topbar. */
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+.pub-brand { font-size: var(--t-h2); letter-spacing: var(--t-h2-ls); font-weight: var(--w-heavy); }
+.pub-top-r { margin-left: auto; text-align: right; }
+
+/* The masthead is the way home from every phase. It is an anchor, so it can be
+   middle-clicked, and it carries the same mark the browser tab does. */
+.brandlink {
+  display: inline-flex; align-items: center; gap: var(--s2);
+  color: var(--ink); text-decoration: none;
+}
+.brandlink:hover { text-decoration: none; color: var(--accent); }
+.brandmark {
+  width: 22px; height: 22px; flex: 0 0 22px;
+  border-radius: var(--r-sm);
+  background: var(--accent); color: var(--on-accent);
+  display: grid; place-items: center;
+  font-size: var(--t-micro); font-weight: var(--w-heavy); letter-spacing: 0;
+}
+
+/* --------------------------------------------------------- the page head ---
+   ONE PRIMARY HEADING PER PAGE, and it is an h1.
+
+   THE DEFECT. Every screen opened with a card whose header was an h2, so the
+   page's own name was the same size and weight as the name of a box inside it.
+   On the role page the largest words were "Before you apply" rather than the
+   job somebody had just clicked, and a person arriving from a link could not
+   tell what they were looking at.
+   ------------------------------------------------------------------------- */
+
+.pub-head { margin-bottom: var(--s4); }
+.pub-head h1 {
+  font-size: var(--t-display);
+  letter-spacing: var(--t-display-ls);
+  line-height: var(--t-display-lh);
+  font-weight: var(--w-heavy);
+}
+.pub-lede { color: var(--muted); margin: var(--s2) 0 0; }
+.pub-meta { display: flex; flex-wrap: wrap; gap: var(--s1) var(--s3); margin-top: var(--s2); }
+.pub-meta > span { color: var(--muted); font-size: var(--t-small); }
+.pub-meta .where { color: var(--ink); font-weight: var(--w-medium); }
+
+/* The role, in one line, above the form. Not a second card of facts: the
+   person has read the role page by then and is filling in boxes, and 350px of
+   repeated detail between the heading and the first input is 350px of scroll. */
+.pub-ctx {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--s1) var(--s3);
+  padding: var(--s2) var(--s3);
+  border: 1px solid var(--line); border-radius: var(--r-md);
+  background: var(--surface-2);
+  margin-bottom: var(--s4);
+}
+.pub-ctx .ctx-t { font-weight: var(--w-strong); }
+.pub-ctx .ctx-s { color: var(--muted); font-size: var(--t-small); }
+.pub-ctx .ctx-v { color: var(--faint); font-size: var(--t-small); font-family: var(--mono); }
+
+.jobhead { margin-bottom: var(--s5); }
+.jobhead .lead { color: var(--muted); margin-top: var(--s3); }
+
+.pub-body {
+  flex: 1 1 auto;
+  width: 100%;
+  /* 62rem, so the job list is scannable and the page is not a wall of full
+     bleed text on a laptop. */
+  max-width: 62rem;
+  margin: 0 auto;
+  padding: var(--s5) var(--s5) var(--s12);
+  /* The same container name app.css keys its responsive rules to, so `.stat`,
+     `.card-hd` and `.qsub` reflow here for free rather than needing a second
+     set of breakpoints. U-108's payoff, borrowed. */
+  container-type: inline-size;
+  container-name: pane;
+}
+
+.pub-foot { border-top: 1px solid var(--line); background: var(--surface); }
+.pub-foot-in { max-width: 62rem; margin: 0 auto; padding: var(--s4) var(--s5); }
+
+/* A reading measure. Prose set to the full 62rem is unreadable, and the
+   disclosure is the one thing on this page somebody has to actually read. */
+.measure { max-width: 66ch; }
+
+/* The three spacing seams the page needs, named for where they are rather than
+   for how big they are, so nothing here becomes a utility class soup. */
+.pub .sim-note { margin-bottom: var(--s4); }
+.needshifts { margin-top: var(--s4); }
+.needshifts .job-shifts { margin-top: var(--s1); }
+.afternote { margin-top: var(--s3); margin-bottom: 0; }
+.chiprow { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2); margin-bottom: var(--s3); }
+.sub-line { display: block; margin-top: var(--s1); }
+
+/* ------------------------------------------------------------- the rail ---
+   Where you are, and what is still to come. Four words, not a progress bar,
+   because a progress bar implies a proportion nobody measured.
+   ------------------------------------------------------------------------- */
+
+.rail {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s2);
+  margin-bottom: var(--s4);
+  color: var(--faint);
+}
+.rail .at { color: var(--ink); font-weight: var(--w-strong); }
+/* A step already passed is a button, because it goes back to that step. It is
+   styled as text on purpose: a row of four buttons across the top of a careers
+   page reads as navigation the page does not have. */
+/* A STEP ALREADY PASSED IS A LINK AND HAS TO LOOK LIKE ONE. It was --muted
+   text with a --line underline, and --line measures 1.25:1 against the page,
+   so the affordance was invisible and the only difference between a step you
+   can go back to and one you cannot was a shade of grey. */
+.rail .done {
+  border: 0; background: none; padding: 0; margin: 0;
+  font: inherit; color: var(--accent); cursor: pointer;
+}
+.rail .done:hover { text-decoration: underline; text-underline-offset: 2px; }
+.rail .ahead { color: var(--faint); }
+
+/* ----------------------------------------------------------- the filters ---
+   One bordered strip, two controls, deliberately unequal. U-105.
+   ------------------------------------------------------------------------- */
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--s3);
+  padding: var(--s3) var(--card-pad);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  margin-bottom: var(--s4);
+}
+.filters .field { margin-bottom: 0; }
+/* Store names carry a number and a place name. Role titles are one or two
+   words. Sizing them the same would waste the row and make the two look like
+   an arbitrary pair of boxes. */
+.filters .f-store { flex: 3 1 15rem; }
+.filters .f-role { flex: 2 1 10rem; }
+.filters .f-count { margin-left: auto; align-self: center; text-align: right; }
+
+/* --------------------------------------------------------- the job list ---
+   Eight jobs, ONE border. Row height comes from the shift chips, so a
+   requisition needing three shifts is genuinely taller than one needing two.
+   ------------------------------------------------------------------------- */
+
+.joblist { display: flex; flex-direction: column; }
+
+.job {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--s1) var(--s4);
+  align-items: start;
+  width: 100%;
+  min-height: var(--tap);
+  padding: var(--s3) var(--card-pad);
+  border: 0;
+  border-bottom: 1px solid var(--line-soft);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--resp-fast) var(--ease-ui);
+}
+.job:last-child { border-bottom: 0; }
+.job:hover { background: var(--surface-2); }
+/* The title carries the affordance. A row that only changes its background on
+   hover reads as highlighted rather than as a way in, and this list is the one
+   control on the page a candidate has to find. */
+.job:hover .job-t, .job:focus-visible .job-t { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+
+.job-t { font-size: var(--t-h3); letter-spacing: var(--t-h3-ls); font-weight: var(--w-strong); }
+.job-where { color: var(--muted); font-size: var(--t-small); }
+/* The COLUMN is explicit as well as the row. With only grid-row set, auto
+   placement put this cell in column one whenever it came first in the DOM,
+   which pushed the title and the store to the right and left a hole where the
+   title should be. Pinning both axes makes the layout independent of the order
+   the markup happens to be built in. */
+.job-pay { grid-column: 2; grid-row: 1 / span 2; text-align: right; white-space: nowrap; align-self: start; }
+.job-rate { font-family: var(--mono); font-weight: var(--w-heavy); }
+.job-per { color: var(--muted); font-size: var(--t-small); }
+/* Not uppercase. "30 HOURS A WEEK" beside every job title is a value shouting
+   in the place of a label, and the label above it is already the loud one. */
+.job-hrs { display: block; color: var(--faint); font-size: var(--t-small); }
+.job-shifts { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: var(--s1); }
+
+/* ---------------------------------------------------------- the job head ---
+   The detail block above the gate. Facts in one run, not in four boxes.
+   ------------------------------------------------------------------------- */
+
+/* The facts a candidate came for, in ONE bordered strip rather than five
+   cards. The pay is the number people look for first, so it is the only one
+   set in the numeric step; the rest are the same size as each other because
+   nothing distinguishes them. */
+.facts {
+  display: flex; flex-wrap: wrap;
+  border: 1px solid var(--line); border-radius: var(--r-lg);
+  background: var(--surface);
+  overflow: hidden;
+  margin: var(--s4) 0;
+}
+.fact {
+  flex: 1 1 auto; min-width: 8.5rem;
+  padding: var(--s3) var(--card-pad);
+  border-right: 1px solid var(--line-soft);
+}
+.fact:last-child { border-right: 0; }
+.fact .k { display: block; color: var(--faint); font-size: var(--t-micro); letter-spacing: var(--t-micro-ls); text-transform: uppercase; font-weight: var(--w-medium); margin-bottom: 2px; }
+.fact .v { font-weight: var(--w-strong); }
+/* The pay is the number people came for, so it is the one fact in the numeric
+   step. The unit inside it is not a number and does not get the numeric face,
+   which is what `.job-per` is for. */
+.fact .v-rate { font-size: var(--t-h2); letter-spacing: var(--t-h2-ls); font-weight: var(--w-heavy); }
+.fact .v-rate .job-rate { font-family: var(--mono); }
+.fact .v-rate .job-per { font-size: var(--t-small); font-weight: var(--w-normal); }
+
+/* ------------------------------------------------------------- the gate ---
+   U-86. Every paragraph carries the rule that requires it, so nobody shortens
+   one without seeing what it was for.
+
+   PROGRESSIVE DISCLOSURE, AND WHY THE CONTROL IS THIS LOUD. Measured at 390 by
+   844 the gate came to 2,631px, about three screens, with the tick box 2,215px
+   down. The six statutory paragraphs are now behind `details.notice`.
+
+   That control is bordered, full width, at least 44px tall, and it carries a
+   second line counting the paragraphs, because the difference between
+   progressive disclosure and hiding a statutory notice is entirely in whether
+   the control reads as a control and says what is behind it.
+   ------------------------------------------------------------------------- */
+
+.notice {
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  margin-bottom: var(--s4);
+}
+.notice-sum {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-height: var(--tap);
+  padding: var(--s2) var(--s3);
+  cursor: pointer;
+  list-style: none;
+}
+/* Safari needs the pseudo-element as well as list-style to drop the marker. */
+.notice-sum::-webkit-details-marker { display: none; }
+.notice-sum-t { font-weight: var(--w-strong); }
+.notice-sum-n { color: var(--faint); font-size: var(--t-small); }
+/* The affordance is a word, not only a triangle, because the triangle is the
+   thing a phone user does not read. */
+.notice-sum-t::after { content: ' \203A'; color: var(--muted); }
+.notice[open] .notice-sum-t::after { content: ' \2039'; }
+.notice[open] .notice-sum { border-bottom: 1px solid var(--line); }
+.notice-bd { padding: var(--s3) var(--s3) var(--s4); }
+.notice:hover { border-color: var(--muted); }
+
+/* The line the whole gate exists to get somebody to. It reads as the primary
+   thing on the screen, which it is. */
+.checkline-main { font-weight: var(--w-strong); }
+
+.para { margin-bottom: var(--s4); }
+.para:last-child { margin-bottom: 0; }
+/* NOT uppercase, and the reason is in the data rather than in taste. Four of
+   the six basis labels are citations, where capitals would be fine. Two are
+   sentences: "The human decision boundary, which is this product design" and
+   "What is NOT collected, stated because it is the question people ask". Those
+   rendered as two lines of shouted prose. The faint colour, the small step and
+   the letter-spacing already mark this as a label, so the capitals were doing
+   no work and could not be applied selectively from here. */
+.para .basis {
+  display: block;
+  color: var(--faint);
+  font-size: var(--t-micro);
+  letter-spacing: var(--t-micro-ls);
+  font-weight: var(--w-medium);
+  margin-bottom: var(--s1);
+}
+.para .text { line-height: 1.6; }
+
+/* Who does what, as three rows with a glyph each. Colour is never the only
+   carrier: the glyph and the sentence say it too. U-98. */
+/* THREE STEPS, NUMBERED, IN ORDER. They were three rows with a glyph each,
+   which read as three unrelated facts rather than as a sequence. The number is
+   the thing that says the call comes first and the decision comes last. It is
+   an ordered list, so a screen reader says "1 of 3" without an aria attribute
+   doing it by hand. */
+/* NOT `.measure`. The reading measure belongs on prose. This is a bordered
+   list, and capping it at 66ch left a box that stopped two thirds of the way
+   across the card with nothing beside it. The sentences inside still wrap at a
+   readable length because the rows are padded. */
+.actors {
+  list-style: none;
+  display: flex; flex-direction: column; gap: 0;
+  margin: 0 0 var(--s4); padding: 0;
+  border: 1px solid var(--line); border-radius: var(--r-lg);
+  background: var(--surface);
+  overflow: hidden;
+}
+.actor {
+  display: flex; align-items: flex-start; gap: var(--s3);
+  padding: var(--s3) var(--card-pad);
+  border-bottom: 1px solid var(--line-soft);
+}
+.actor:last-child { border-bottom: 0; }
+.actor-n {
+  width: 22px; height: 22px; flex: 0 0 22px; margin-top: 1px;
+  border-radius: 50%;
+  border: 1px solid var(--owner-line, var(--line));
+  background: var(--owner-soft, var(--surface-2));
+  color: var(--owner, var(--muted));
+  display: grid; place-items: center;
+  font-size: var(--t-micro); font-weight: var(--w-bold);
+  font-variant-numeric: tabular-nums;
+}
+.actor-b { min-width: 0; }
+.actor .who { display: flex; align-items: center; gap: var(--s2); font-weight: var(--w-strong); }
+.actor .what { color: var(--muted); font-size: var(--t-small); line-height: 1.5; margin-top: 2px; }
+
+/* ------------------------------------------------- the running notice clock ---
+   `.clockbox` WAS HERE AND IT IS GONE. The candidate gate no longer renders a
+   notice countdown, so there is nothing on this page to style.
+
+   Why, in one line each, and the long version is on `renderGate` in careers.js:
+   a countdown of the ten business days is an operator control rather than a
+   statutory notice, `compliance.js` already computes the same clock for the
+   surface whose reader needs it, and the copy that was on the phone printed
+   "Not computed" and then, once the server sent a due date, "0d 00h 00m 00s"
+   in the largest type on the page. An amber warning box was the first thing a
+   candidate's eye landed on and it read as a verdict on them.
+
+   Nothing else in this file uses `own-clock`. If a candidate-facing clock is
+   ever wanted again it needs a new component and a decision, not this one
+   restored.
+   ------------------------------------------------------------------------- */
+
+/* --------------------------------------------- the shifts this role needs ---
+   THE DEFECT. Measured at 390 by 844: `.slotwrap` is 324px wide, the table is
+   435px. Saturday's column starts at x=319 and Sunday's at x=377, so on six of
+   the eight open requisitions the shift the role REQUIRES was off the right
+   edge of the phone, inside a sideways scroll nested in a vertically scrolling
+   page. This file used to say the width "costs nothing but a sideways scroll
+   on the narrowest phones". It cost the answer.
+
+   Seven day columns at the 44px minimum need 308px before the label column, so
+   there is no arrangement of this table that fits a 324px window. The grid was
+   never going to work on a phone, which is why the required shifts are now
+   asked above it as full-width rows and the grid is optional.
+   ------------------------------------------------------------------------- */
+
+.nshifts { display: flex; flex-direction: column; gap: var(--s2); margin-bottom: var(--s3); }
+
+/* One required shift. Vertical on a phone and horizontal where there is room,
+   which is the only breakpoint on this component: a row that wraps its answer
+   under its question is still one row. */
+.nshift {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s2) var(--s4);
+  padding: var(--s2) var(--s3);
+  border: 1px solid var(--owner-line, var(--line));
+  border-left-width: 3px;
+  border-radius: var(--r-md);
+  background: var(--owner-soft, var(--surface-2));
+}
+.nshift.bad { border-color: var(--crit); background: var(--crit-soft); }
+.nshift-t { flex: 1 1 12rem; min-width: 0; }
+.nshift-t .d { display: block; font-weight: var(--w-strong); }
+.nshift-t .h { display: block; color: var(--muted); font-size: var(--t-small); }
+.nshift-a { display: flex; gap: var(--s2); }
+/* Pressable pills rather than a bare radio, because these two are the answer
+   the whole grid failed to collect. Full 44px, and the label is the target. */
+.nshift-opt {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s2);
+  min-height: var(--tap);
+  min-width: 4.5rem;
+  padding: 0 var(--s3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  cursor: pointer;
+}
+.nshift-opt:hover { border-color: var(--muted); }
+.nshift-opt:has(input:checked) { border-color: var(--accent); }
+.nshift-note { flex: 1 1 100%; color: var(--muted); font-size: var(--t-small); line-height: 1.5; }
+.nshift-note:empty { display: none; }
+
+/* The rest of the week, folded. Same control shape as the full notice on the
+   gate, because it is the same promise: a labelled tap, nothing hidden. */
+.moreshifts {
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+}
+.moreshifts-sum {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-height: var(--tap);
+  padding: var(--s2) var(--s3);
+  cursor: pointer;
+  list-style: none;
+}
+.moreshifts-sum::-webkit-details-marker { display: none; }
+.moreshifts-sum-t { font-weight: var(--w-medium); }
+.moreshifts-sum-t::after { content: ' \203A'; color: var(--muted); }
+.moreshifts[open] .moreshifts-sum-t::after { content: ' \2039'; }
+.moreshifts-sum-n { color: var(--faint); font-size: var(--t-small); }
+.moreshifts[open] .moreshifts-sum { border-bottom: 1px solid var(--line); }
+.moreshifts-bd { padding: var(--s3); }
+
+/* -------------------------------------------------------- the shift grid ---
+   Three parts of the day down, seven days across. The columns are equal width
+   and that is the one place U-105 is satisfied by the data rather than by
+   variation: seven days of the week are seven of the same thing, and making
+   Tuesday narrower than Saturday would be a lie about the rota.
+   ------------------------------------------------------------------------- */
+
+.slots { width: 100%; border-collapse: collapse; }
+.slots th, .slots td { border-bottom: 1px solid var(--line-soft); text-align: center; }
+.slots tbody tr:last-child td { border-bottom: 0; }
+.slots th {
+  color: var(--faint);
+  font-size: var(--t-micro);
+  letter-spacing: var(--t-micro-ls);
+  text-transform: uppercase;
+  font-weight: var(--w-medium);
+  padding: var(--cell-pad-y) var(--s1);
+  border-bottom-color: var(--line);
+}
+.slots th.part-h { text-align: left; padding-left: 0; }
+.slots td { padding: 0; }
+
+.slots .part { text-align: left; padding: var(--cell-pad-y) var(--s3) var(--cell-pad-y) 0; white-space: nowrap; }
+.slots .part .p { font-weight: var(--w-medium); }
+.slots .part .hrs { display: block; color: var(--faint); font-size: var(--t-micro); letter-spacing: var(--t-micro-ls); }
+
+/* The whole cell is the target, so a thumb does not have to find an 18px box.
+
+   Square, not just tall, at 44 by 44, which is WCAG 2.5.5.
+
+   THIS COMMENT USED TO END "so the width costs nothing but a sideways scroll
+   on the narrowest phones". That was the wrong trade and it was made here. It
+   cost the two answers the Deli role requires, which sat at x=319 and x=377
+   inside a 324px window. The grid is still 435px wide and still scrolls, and
+   that is now acceptable only because it no longer holds the required answer.
+   See `.nshifts` above. */
+.slots .cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: var(--tap);
+  min-width: var(--tap);
+  padding: var(--s1);
+  cursor: pointer;
+}
+.slots .cell:hover { background: var(--surface-2); }
+/* A shift the role requires. The hue comes from `own-human`, because these
+   hours were set by the store manager on the requisition, and the word
+   "needed" is printed under the box so the colour is not doing the work. */
+.slots .cell.need { background: var(--owner-soft, var(--surface-2)); }
+.slots .cell .req { color: var(--owner, var(--muted)); font-size: var(--t-micro); letter-spacing: var(--t-micro-ls); text-transform: uppercase; font-weight: var(--w-medium); }
+/* A day and part this store's rota does not run. Thirteen slots exist, not
+   twenty-one, and inventing the other eight would put a tick box on the form
+   that no requisition can ever require. */
+.slots .cell.off { cursor: default; background: var(--surface-2); }
+.slots .cell.off:hover { background: var(--surface-2); }
+.slots .cell .none { color: var(--faint); font-size: var(--t-micro); letter-spacing: var(--t-micro-ls); }
+
+.slotwrap { overflow-x: auto; }
+
+/* THE SCROLL CUE, AND WHY IT IS A SENTENCE RATHER THAN A GRADIENT.
+
+   A grid of empty boxes with a hard right edge gives no sign that there is
+   more week past it, which is half of why the weekend columns went unseen. The
+   usual answer is a fade on the right edge. A fade over a 44px cell dims about
+   40 percent of a real tick box, and at the end of the scroll it dims one that
+   is fully visible, so the cue would be hiding the thing it is pointing at.
+   The other half was the required answers living in here, and that is fixed by
+   taking them out. So this is a line of text ABOVE the grid, where somebody
+   reads it before they scroll rather than after. */
+.slothint { color: var(--muted); font-size: var(--t-small); margin-bottom: var(--s2); }
+.legend { color: var(--faint); font-size: var(--t-small); margin-top: var(--s2); }
+
+/* ------------------------------------------------------------- the form ---
+   The constraint sits NEXT to the input, not in an error after submission.
+   U-87.
+   ------------------------------------------------------------------------- */
+
+/* ----------------------------------------------------------- form groups ---
+   FOUR SECTIONS, NOT TEN BOXES IN A COLUMN. The grouping and the line under
+   each heading come from the server's own field record, so what is collected
+   and how it is explained stay one reviewable thing.
+
+   The separator is a rule and a heading, not another card. Four cards inside a
+   card is the shape this whole pass exists to stop.
+   ------------------------------------------------------------------------- */
+
+.fgroups { display: flex; flex-direction: column; gap: var(--s6); }
+.fgroup-hd { padding-bottom: var(--s2); margin-bottom: var(--s4); border-bottom: 1px solid var(--line); }
+.fgroup-hd h3 { font-size: var(--t-h3); letter-spacing: var(--t-h3-ls); font-weight: var(--w-bold); }
+.fgroup-note { color: var(--faint); font-size: var(--t-small); margin: 2px 0 0; }
+.fgroup-bd > .field:last-child { margin-bottom: 0; }
+
+/* The label and the constraints it governs, on one line. U-87 puts the
+   requisition's own minimum age, shift count and commute band here rather than
+   in an error message after submission. */
+.labrow { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2); margin-bottom: var(--s1); }
+.labrow .lab { margin-bottom: 0; }
+/* The two questions that are not required. Marked rather than the eight that
+   are, because eight asterisks is decoration and two words are information. */
+.opt {
+  color: var(--faint);
+  font-size: var(--t-micro); letter-spacing: var(--t-micro-ls);
+  text-transform: uppercase; font-weight: var(--w-medium);
+}
+
+/* A fieldset is the right element for the radio pair and the shift grid, and
+   its default border and padding are not wanted. */
+fieldset.field { border: 0; margin: 0 0 var(--s3); padding: 0; min-width: 0; }
+fieldset.field > legend.lab { padding: 0; }
+
+.fieldnote { margin-top: var(--s1); }
+.formerr { margin-top: var(--s4); }
+
+/* What a picked commute band counts as. NOT `.micro`, which app.css sets to
+   uppercase: this note used to arrive as twenty-five words of capitals the
+   instant somebody answered the question. */
+.bandnote { display: block; color: var(--muted); font-size: var(--t-small); line-height: 1.5; }
+
+/* A near miss on the date of birth, said before the submit rather than after
+   the refusal. Muted, because it is a question and not a verdict. */
+.hint { color: var(--muted); font-size: var(--t-small); line-height: 1.5; margin-top: var(--s1); }
+.hint:empty { display: none; }
+
+/* THE SECOND ERROR VOICE, and the reason there are two.
+
+   `.fail` is red, bordered, timestamped and carries a monospace block. It is
+   right for a request that did not reach the hiring system, where the reader
+   is whoever has to fix it. It was also what a person got for missing a tick
+   box, which read as a rejection of them and as a fault log about their own
+   typo.
+
+   So this is the other voice. Amber rather than red, because nothing is
+   broken. No timestamp and no monospace, because there is nothing to
+   diagnose. The amber is the `--warn-*` pair app.css already uses for the warn
+   tone, so the colour carries a meaning rather than being picked here. */
+.fixme {
+  border: 1px solid var(--warn-line, var(--line));
+  border-left-width: 3px;
+  border-radius: var(--r-md);
+  background: var(--warn-soft, var(--surface-2));
+  padding: var(--s3);
+}
+.fixme-what { font-weight: var(--w-strong); }
+.fixme-why { color: var(--muted); font-size: var(--t-small); line-height: 1.55; margin-top: var(--s1); }
+
+/* What was typed, kept on this device. One line and a way out of it, because
+   somebody on a borrowed phone has to be able to clear it. */
+.keptline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s3);
+  padding: var(--s2) var(--s3);
+  border: 1px dashed var(--line);
+  border-radius: var(--r-md);
+  color: var(--muted);
+  font-size: var(--t-small);
+  margin-bottom: var(--s4);
+}
+.keptline .btn { min-height: var(--tap); }
+
+/* EVERY typed control on this page is var(--tap) tall, and the reason is that
+   nothing here is an operator control.
+
+   app.css sets inputs to 34px, which measured 37 to 41px once padding and the
+   border were in. That is the right height in a three-column chrome where a
+   district manager is on a laptop. It is under the WCAG 2.5.5 target of 44 by
+   44 on the one surface whose user is standing on a bus. The container is
+   scoped to `.pub` so the operator density is untouched. */
+.pub input[type="text"], .pub input[type="email"], .pub input[type="tel"],
+.pub input[type="date"], .pub select, .pub textarea {
+  min-height: var(--tap);
+}
+/* The filter selects too, on the job list, which is the first thing a thumb
+   touches on this page. */
+.filters select { min-height: var(--tap); }
+
+input[type="checkbox"], input[type="radio"] {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  /* The primary. Left to the browser this is the platform blue, which is the
+     one colour on the page nobody chose. */
+  accent-color: var(--accent);
+  margin: 0;
+}
+
+/* The consent box is the one control the whole gate exists to reach, so it is
+   the one that gets the larger box. The label is still the tap target and it
+   is 44px tall, which is what WCAG 2.5.5 measures; this is about being able to
+   SEE the thing you are looking for on a phone in daylight. */
+.checkline {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s3);
+  min-height: var(--tap);
+  padding: var(--s2) 0;
+  cursor: pointer;
+}
+.checkline input[type="checkbox"] { width: 24px; height: 24px; flex-basis: 24px; margin-top: 1px; }
+.checkline .t { line-height: 1.5; }
+
+/* Two radio buttons on one line, for the right-to-work yes or no. Pressable
+   pills at the full 44px rather than a bare radio with a word next to it: an
+   answer that decides eligibility should not be a 20px target. */
+.yesno { display: flex; flex-wrap: wrap; gap: var(--s3); }
+.yesno label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s2);
+  min-height: var(--tap);
+  min-width: 5.5rem;
+  padding: 0 var(--s3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  cursor: pointer;
+}
+.yesno label:hover { border-color: var(--muted); }
+.yesno label:has(input:checked) { border-color: var(--accent); }
+
+.bandrow { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2); }
+.bandrow select { flex: 1 1 15rem; }
+
+.form-ft { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s3); margin-top: var(--s5); }
+.form-ft .btn { min-height: var(--tap); padding: 0 var(--s5); }
+.form-ft .btn.lg { padding: 0 var(--s6); font-weight: var(--w-strong); }
+/* Why the primary control is refused, beside it. A disabled button with no
+   explanation is a person deciding the page is broken. */
+.ctahint { color: var(--muted); font-size: var(--t-small); flex: 1 1 100%; margin-top: calc(var(--s2) * -1); }
+.form-ft .note { color: var(--faint); font-size: var(--t-micro); letter-spacing: var(--t-micro-ls); }
+
+/* ---------------------------------------------------- the two call methods ---
+   U-92. Browser first, outbound second, and the two are not the same size
+   because they are not the same choice.
+   ------------------------------------------------------------------------- */
+
+.callblock { margin-top: var(--s4); }
+.calls { display: flex; flex-wrap: wrap; gap: var(--s3); margin-bottom: var(--s3); }
+.calls .btn { min-height: var(--tap); padding: 0 var(--s5); }
+.calls .call-1 { flex: 3 1 17rem; }
+.calls .call-2 { flex: 2 1 13rem; }
+/* The reason an unavailable method is unavailable, printed under its own
+   button rather than as a tooltip nobody opens. Never hidden. */
+.callwhy { color: var(--muted); font-size: var(--t-small); line-height: 1.5; margin-bottom: var(--s3); }
+
+.reasons { margin: 0 0 var(--s4); padding-left: var(--s5); }
+.reasons li { margin-bottom: var(--s2); line-height: 1.55; }
+
+.kv { display: flex; flex-wrap: wrap; gap: var(--s1) var(--s4); margin-top: var(--s2); }
+.kv .k { color: var(--faint); font-size: var(--t-micro); letter-spacing: var(--t-micro-ls); text-transform: uppercase; font-weight: var(--w-medium); }
+.kv .v { font-family: var(--mono); font-size: var(--t-small); }
+
+/* --------------------------------------------------------- responsive ---
+   Keyed to the container, like everything else in this build.
+   ------------------------------------------------------------------------- */
+
+@container pane (max-width: 34rem) {
+  .pub-head h1 { font-size: var(--t-h1); letter-spacing: var(--t-h1-ls); }
+  .fact { flex-basis: 50%; border-bottom: 1px solid var(--line-soft); }
+  .fact:nth-last-child(-n+1) { border-bottom: 0; }
+  .job { grid-template-columns: minmax(0, 1fr); }
+  .job-pay { grid-column: 1; grid-row: auto; text-align: left; }
+  .filters .f-store, .filters .f-role { flex-basis: 100%; }
+  .filters .f-count { margin-left: 0; text-align: left; }
+  .calls .call-1, .calls .call-2 { flex-basis: 100%; }
+}
+
+@media (max-width: 40rem) {
+  .pub-top { padding: 0 var(--s4); }
+  .pub-body { padding: var(--s4) var(--s4) var(--s10); }
+  .pub-foot-in { padding: var(--s4); }
+}

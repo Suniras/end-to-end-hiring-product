@@ -1,0 +1,399 @@
+/* ============================================================================
+   app.css  ·  the primitives every surface shares
+
+   ZERO RAW HEX IN THIS FILE. U-104. Every colour is a token, and every colour
+   token sits on a class encoding an owner (own-*), a tone (is-good, is-warn,
+   is-crit) or an interaction state. The check is
+   `grep -c '#[0-9A-Fa-f]\{3,6\}' web/css/app.css` returns 0.
+
+   NO TWO ADJACENT BLOCKS SHARE DIMENSIONS unless the data makes them share.
+   U-105. There is no .grid.c2 / .c3 / .c4 in this file, deliberately. A uniform
+   card grid is the single most recognisable AI-generated layout and the
+   previous build had seven of them. Where several numbers belong together they
+   go in ONE bordered strip (.stats), not in four bordered cards: same
+   information, one border instead of four.
+
+   ELEVATION IS RESERVED for things that genuinely float. U-103. box-shadow
+   appears exactly four times below: the sheet, the drawer, the assistant panel
+   and :focus-visible. Cards and hovers separate with --line and a --surface-2
+   step. If you are adding a fifth shadow, you are decorating.
+
+   ONE DENSITY. U-99. Rows target 38px so twenty funnel rows plus stage headers
+   fit one view, which is the only way U-40's duration argument reads.
+   ============================================================================ */
+
+/* --------------------------------------------------------------- base --- */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: var(--t-body);
+  letter-spacing: var(--t-body-ls);
+  font-weight: var(--w-normal);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  /* Tabular figures hoisted to the body. U-100. At this density every number
+     sits in a column, and eleven opt-in sites means the twelfth is the one
+     that jitters. Prose opts out below. */
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1, "cv05" 1;
+}
+
+/* Prose opts out, or body copy gets tabular figures too. U-100. */
+.prose, .prose *, p.copy, .sim-note, .empty-body {
+  font-variant-numeric: normal;
+  font-feature-settings: "tnum" 0;
+}
+
+h1, h2, h3, h4 { margin: 0; font-weight: var(--w-bold); }
+h1 { font-size: var(--t-h1); letter-spacing: var(--t-h1-ls); line-height: 1.2; }
+h2 { font-size: var(--t-h2); letter-spacing: var(--t-h2-ls); line-height: 1.25; }
+h3 { font-size: var(--t-h3); letter-spacing: var(--t-h3-ls); line-height: 1.3; }
+p  { margin: 0 0 var(--s3); }
+a  { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+code, .mono, .num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+/* A VERTICAL STACK, AND IT WAS USED IN NINE PLACES WITH NO RULE BEHIND IT.
+
+   `.col` and `.col.tight` appear in the rail's context block, the queue row,
+   the drawer's identity block, the page header and two candidate screens, and
+   neither class was declared in any stylesheet. Every one of those was a div
+   whose children laid out however the browser felt: the rail's context block
+   rendered "Marcus HaleStore manager" as one inline run with no space in it,
+   because two inline spans with no rule are one line of text.
+
+   A class name that styles nothing is the cheapest tell there is that markup
+   was written faster than the stylesheet. Declared once, here, because the
+   intent behind all nine is the same one. */
+.col { display: flex; flex-direction: column; min-width: 0; }
+.col.tight { gap: 0; line-height: 1.3; }
+
+.small   { font-size: var(--t-small); letter-spacing: var(--t-small-ls); }
+.micro   { font-size: var(--t-micro); letter-spacing: var(--t-micro-ls); text-transform: uppercase; font-weight: var(--w-medium); }
+.muted   { color: var(--muted); }
+.faint   { color: var(--faint); }
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  /* Shadow 1 of 4. A focus ring genuinely floats above the thing it rings. */
+  box-shadow: 0 0 0 4px var(--accent-soft);
+  border-radius: var(--r-sm);
+}
+
+/* ============================================================================
+   WHAT WAS DELETED FROM HERE, AND WHY IT IS RECORDED RATHER THAN QUIETLY GONE
+
+   A three-column `.shell` grid, `.brand`, `.topbar`, `.nav`, `.nav-group`,
+   `.nav-item`, `.content` and `.assistant`, plus the whole `.ch-*` assistant
+   thread further down, plus `.qitem` / `.qlist` / `.qmain` / `.qname` /
+   `.qsub`, plus `.seq` / `.seq-step` / `.timer`, plus `.skel`, `.bars`,
+   `.bar-row`, `.bar-axis`, `.display` and `.eyebrow`.
+
+   NOTHING RENDERED ANY OF IT. The operator side is `.ops` in shell.css and the
+   candidate side is `.pub` in careers.css; the queue is a table; there is no
+   assistant in this build and no rail item for one. Between them they were
+   about 150 lines of a stylesheet describing an interface that does not exist,
+   which is the reason `.col` and `.col.tight` could be used in nine places
+   while being declared in none: nobody could tell what this file was for.
+
+   If an assistant column is ever built, it is a new component with a new
+   decision behind it, not this one restored. The one piece kept is `.stats`,
+   which the pipeline and store pages still use.
+   ============================================================================ */
+
+/* --------------------------------------------------------------- cards ---
+   A card is a border and a background step. No shadow, no hover lift.
+   ------------------------------------------------------------------------- */
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  margin-bottom: var(--s4);
+  overflow: hidden;
+}
+.card-hd {
+  display: flex; align-items: baseline; gap: var(--s3);
+  padding: var(--s3) var(--card-pad);
+  border-bottom: 1px solid var(--line);
+  background: var(--surface-2);
+}
+.card-hd h2, .card-hd h3 { margin-right: auto; }
+.card-hd .sub { color: var(--muted); font-size: var(--t-small); }
+/* Was --s5. U-99. */
+.card-bd { padding: var(--card-pad); }
+.card-bd.flush { padding: 0; }
+
+/* One bordered strip for several numbers, never one card each. U-105. */
+.stats {
+  display: flex; flex-wrap: wrap;
+  border: 1px solid var(--line); border-radius: var(--r-lg);
+  background: var(--surface);
+  overflow: hidden;
+  margin-bottom: var(--s4);
+}
+.stat {
+  flex: 1 1 0; min-width: 150px;
+  padding: var(--s3) var(--card-pad);
+  border-right: 1px solid var(--line-soft);
+}
+.stat:last-child { border-right: 0; }
+.stat-val { font-size: var(--t-num); letter-spacing: var(--t-num-ls); font-weight: var(--w-heavy); line-height: 1.1; display: block; }
+.stat-lab { color: var(--muted); font-size: var(--t-small); display: block; margin-top: var(--s1); }
+.stat-sub { color: var(--faint); font-size: var(--t-micro); letter-spacing: var(--t-micro-ls); display: block; margin-top: var(--s1); }
+button.stat { border-left: 0; border-top: 0; border-bottom: 0; background: none; font: inherit; color: inherit; text-align: left; cursor: pointer; }
+button.stat:hover { background: var(--surface-2); }
+
+/* --------------------------------------------------------------- tables ---
+   Dense, with a visible row rule. The rule only works because --line-soft was
+   rebuilt: at its old 1.13:1 this table was a wall. U-96 and U-99 together.
+   ------------------------------------------------------------------------- */
+
+.tw { overflow-x: auto; }
+table.t { width: 100%; border-collapse: collapse; }
+table.t th, table.t td {
+  /* Was --s3 --s4. U-99. */
+  padding: var(--cell-pad-y) var(--cell-pad-x);
+  text-align: left;
+  border-bottom: 1px solid var(--line-soft);
+  vertical-align: middle;
+}
+table.t th {
+  color: var(--faint);
+  font-size: var(--t-micro); letter-spacing: var(--t-micro-ls);
+  text-transform: uppercase; font-weight: var(--w-medium);
+  background: var(--surface);
+  position: sticky; top: 0; z-index: 1;
+  border-bottom-color: var(--line);
+  white-space: nowrap;
+}
+table.t tbody tr:last-child td { border-bottom: 0; }
+table.t tbody tr:hover { background: var(--surface-2); }
+table.t td.num, table.t th.num { text-align: right; font-family: var(--mono); }
+table.t td.wrap { white-space: normal; }
+
+/* ------------------------------------------------------- owner encoding ---
+   Four hues. Never colour alone. U-98.
+   ------------------------------------------------------------------------- */
+
+.own-agent  { --owner: var(--agent);  --owner-soft: var(--agent-soft);  --owner-line: var(--agent-line); }
+.own-human  { --owner: var(--accent); --owner-soft: var(--accent-soft); --owner-line: var(--accent-line); }
+.own-system { --owner: var(--system); --owner-soft: var(--system-soft); --owner-line: var(--system-line); }
+.own-clock  { --owner: var(--clock);  --owner-soft: var(--clock-soft);  --owner-line: var(--clock-line); }
+
+/* The glyph. A 16px inline SVG whose stroke is currentColor, so it inherits
+   the owner hue with no extra rule. Four silhouettes chosen to differ in
+   OUTLINE rather than in internal detail, because internal detail is mush at
+   10px: head-and-shoulders, diamond, square, hourglass. Legible in greyscale,
+   in print, and to any colour vision.
+
+   Measured, and this is why the glyph is not optional: reduced to luminance
+   these four hues collapse into each other three times in LIGHT theme and
+   three times in DARK. Dark --accent against --system is 1.000, exactly
+   identical, and that pair is a named human against deterministic software,
+   which is the one distinction the New York City and California rules turn on.
+   Light --system against --clock is 1.012, which the record did not have. */
+.glyph { width: 16px; height: 16px; flex: 0 0 16px; color: var(--owner, var(--muted)); display: inline-block; vertical-align: -3px; }
+.glyph svg { display: block; width: 100%; height: 100%; }
+.glyph-sm { width: 10px; height: 10px; flex-basis: 10px; vertical-align: -1px; }
+
+.chip {
+  display: inline-flex; align-items: center; gap: var(--s1);
+  padding: 2px var(--s2);
+  border: 1px solid var(--owner-line, var(--line));
+  border-radius: var(--r-pill);
+  background: var(--owner-soft, var(--surface-2));
+  color: var(--owner, var(--muted));
+  font-size: var(--t-micro); letter-spacing: var(--t-micro-ls);
+  font-weight: var(--w-medium); text-transform: uppercase;
+  white-space: nowrap;
+}
+.chip.is-good { border-color: var(--good-line); background: var(--good-soft); color: var(--good); }
+.chip.is-warn { border-color: var(--warn-line); background: var(--warn-soft); color: var(--warn); }
+.chip.is-crit { border-color: var(--crit-line); background: var(--crit-soft); color: var(--crit); }
+
+/* A tone never travels without a number beside it. U-101. The rule is
+   enforced in the markup, and this makes a bare tone chip visibly wrong in
+   review by leaving the value slot empty and legible. */
+.chip .v { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+/* --------------------------------------------------------- time bars ---
+   U-21's overlapping bars, and the reason the wait is hatched. U-102.
+   Work is a solid --owner fill. Waiting is hatched at 45 degrees on a fixed
+   6px pitch. A lighter tint was rejected: with the fill set from var(--owner)
+   a tint puts --system-line beside --system, and where two bars overlap one
+   bar's tinted wait and another's solid work land at similar luminance and the
+   eye reads one shape. Overlap is the whole point of this component, so
+   overlap is the test the encoding has to pass.
+   ------------------------------------------------------------------------- */
+
+.bar {
+  position: absolute; top: 0; height: 100%;
+  border-radius: 2px;
+  min-width: 3px;
+}
+.bar.work { background: var(--owner, var(--system)); }
+.bar.wait {
+  background:
+    repeating-linear-gradient(
+      var(--hatch-angle),
+      var(--hatch-ink) 0,
+      var(--hatch-ink) 1px,
+      transparent 1px,
+      transparent var(--hatch-pitch)
+    ),
+    var(--owner-soft, var(--surface-2));
+  border: 1px solid var(--owner-line, var(--line));
+}
+
+/* --------------------------------------------------- simulated marking ---
+   A dashed edge means "not the real thing" throughout this build, which is
+   why the hatch above reads as waiting rather than as decoration: a non-solid
+   treatment already carries that meaning here.
+   ------------------------------------------------------------------------- */
+
+.sim {
+  display: inline-flex; align-items: center; gap: var(--s1);
+  padding: 1px var(--s2);
+  border: 1px dashed var(--line);
+  border-radius: var(--r-sm);
+  color: var(--faint);
+  font-size: var(--t-micro); letter-spacing: var(--t-micro-ls);
+  text-transform: uppercase; font-weight: var(--w-medium);
+}
+.sim-note {
+  border: 1px dashed var(--line);
+  border-radius: var(--r-md);
+  padding: var(--s2) var(--s3);
+  color: var(--muted);
+  font-size: var(--t-small);
+  background: var(--surface-2);
+}
+
+/* ------------------------------------------------------------- controls --- */
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--s2);
+  min-height: 32px; padding: 0 var(--s3);
+  border: 1px solid var(--line); border-radius: var(--r-md);
+  background: var(--surface); color: var(--ink);
+  font: inherit; font-weight: var(--w-medium); cursor: pointer;
+  transition: background var(--resp-fast) var(--ease-ui), border-color var(--resp-fast) var(--ease-ui);
+}
+.btn:hover { background: var(--surface-2); border-color: var(--muted); }
+.btn:active { transform: scale(0.985); }
+.btn[disabled] { opacity: 0.5; cursor: not-allowed; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.btn.primary:hover { background: var(--accent); filter: brightness(1.08); }
+.btn.danger { color: var(--crit); border-color: var(--crit-line); background: var(--crit-soft); }
+.btn.sm { min-height: 26px; padding: 0 var(--s2); font-size: var(--t-small); }
+
+.field { display: block; margin-bottom: var(--s3); }
+.field > .lab { display: block; font-size: var(--t-small); font-weight: var(--w-medium); margin-bottom: var(--s1); }
+/* SENTENCE CASE PROSE, NOT A LABEL. This was --t-micro with the micro
+   tracking, which is the step designed for two uppercase words. Under it ran
+   real sentences: "This role has a minimum age. It is also used to check
+   whether you have worked for us before." at 11px with 0.075em of extra
+   letter-spacing, on the one surface whose reader is standing on a bus. */
+.field > .why { display: block; color: var(--muted); font-size: var(--t-small);
+                letter-spacing: var(--t-small-ls); line-height: 1.45; margin-bottom: var(--s2); }
+input[type="text"], input[type="email"], input[type="tel"], input[type="date"], select, textarea {
+  width: 100%; min-height: 34px; padding: var(--s2) var(--s3);
+  border: 1px solid var(--line); border-radius: var(--r-md);
+  background: var(--surface); color: var(--ink); font: inherit;
+}
+textarea { min-height: 72px; resize: vertical; }
+.field.bad input, .field.bad select, .field.bad textarea { border-color: var(--crit); }
+.field .err { color: var(--crit); font-size: var(--t-small); display: block; margin-top: var(--s1); }
+
+/* ------------------------------------------------ the one action drawer ---
+   ONE implementation. U-30. Every surface that acts opens THIS, so a reason
+   field and a confirmation exist once rather than five times.
+   ------------------------------------------------------------------------- */
+
+.scrim {
+  position: fixed; inset: 0; z-index: 40;
+  background: var(--ink); opacity: 0;
+  transition: opacity var(--resp-ui) var(--ease-ui);
+}
+.scrim.open { opacity: 0.28; }
+
+.drawer {
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 41;
+  width: min(460px, 100vw);
+  background: var(--surface);
+  border-left: 1px solid var(--line);
+  display: flex; flex-direction: column;
+  transform: translateX(100%);
+  transition: transform var(--resp-ui) var(--ease-ui);
+  /* Shadow 3 of 4. */
+  box-shadow: var(--shadow-lift);
+}
+.drawer.open { transform: none; }
+.drawer-hd { display: flex; align-items: center; gap: var(--s3); padding: var(--s3) var(--card-pad); border-bottom: 1px solid var(--line); }
+.drawer-bd { flex: 1 1 auto; overflow-y: auto; padding: var(--card-pad); }
+.drawer-ft { padding: var(--s3) var(--card-pad); border-top: 1px solid var(--line); display: flex; gap: var(--s2); justify-content: flex-end; background: var(--surface-2); }
+
+.sheet {
+  position: fixed; inset: 0; z-index: 41;
+  display: grid; place-items: center;
+  padding: var(--s6);
+  pointer-events: none;
+}
+.sheet > .panel {
+  width: min(560px, 100%); max-height: 100%;
+  overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--line); border-radius: var(--r-lg);
+  pointer-events: auto;
+  /* Shadow 4 of 4. */
+  box-shadow: var(--shadow-float);
+}
+
+/* ------------------------------------------------------- states, useful ---
+   An empty state says what the system did, not "No data". A failed connector
+   says what failed, when, whether a retry is possible and who owns it. A
+   loading state keeps its context.
+   ------------------------------------------------------------------------- */
+
+.empty { padding: var(--s8) var(--card-pad); text-align: center; }
+.empty-title { font-weight: var(--w-strong); margin-bottom: var(--s1); }
+.empty-body  { color: var(--muted); font-size: var(--t-small); max-width: 46ch; margin: 0 auto; }
+.empty-stat  { color: var(--faint); font-size: var(--t-micro); letter-spacing: var(--t-micro-ls); margin-top: var(--s3); }
+
+.fail {
+  border: 1px solid var(--crit-line); border-radius: var(--r-md);
+  background: var(--crit-soft); padding: var(--s3);
+}
+.fail-what { color: var(--crit); font-weight: var(--w-strong); }
+.fail-when { color: var(--muted); font-size: var(--t-small); }
+.fail-err  { font-family: var(--mono); font-size: var(--t-small); background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sm); padding: var(--s2); margin: var(--s2) 0; overflow-x: auto; }
+
+/* -------------------------------------------------------- responsive ---
+   Keyed to the CONTENT container, not the viewport, so opening the assistant
+   reflows the page with no extra breakpoints. U-108's whole payoff.
+   ------------------------------------------------------------------------- */
+
+@container pane (max-width: 62rem) {
+  .stat { min-width: 130px; }
+  .card-hd { flex-wrap: wrap; }
+}
+@container pane (max-width: 46rem) {
+  .stat { flex-basis: 50%; }
+}
+@container pane (max-width: 32rem) {
+  .stat { flex-basis: 100%; border-right: 0; border-bottom: 1px solid var(--line-soft); }
+  .stat:last-child { border-bottom: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drawer { transition: none; }
+}

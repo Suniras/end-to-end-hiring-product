@@ -1,0 +1,4 @@
+# The database is generated. Reseed with R in the interface, or delete this
+# file and restart.
+state.json
+*.tmp

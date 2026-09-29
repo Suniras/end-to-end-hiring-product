@@ -1,0 +1,130 @@
+[
+ {
+  "text": "go ahead and hire alicia reyes",
+  "expect": "approve_candidate"
+ },
+ {
+  "text": "sign alicia off",
+  "expect": "approve_candidate"
+ },
+ {
+  "text": "put ines through",
+  "expect": "approve_candidate"
+ },
+ {
+  "text": "reject ryan kettle please",
+  "expect": "reject_candidate"
+ },
+ {
+  "text": "clear everyone scoring over 70",
+  "expect": "approve_batch"
+ },
+ {
+  "text": "push all the clean ones through",
+  "expect": "approve_batch"
+ },
+ {
+  "text": "pull kayla off next weeks shifts",
+  "expect": "remove_shift"
+ },
+ {
+  "text": "cancel kaylas shifts",
+  "expect": "remove_shift"
+ },
+ {
+  "text": "what do i need to look at",
+  "expect": "queue_summary"
+ },
+ {
+  "text": "whats outstanding for me",
+  "expect": "queue_summary"
+ },
+ {
+  "text": "why has trevor been stopped",
+  "expect": "explain_flag"
+ },
+ {
+  "text": "whats the problem with trevor boone",
+  "expect": "explain_flag"
+ },
+ {
+  "text": "wheres kayla up to on everify",
+  "expect": "compliance_status"
+ },
+ {
+  "text": "how many days left on kaylas mismatch",
+  "expect": "compliance_status"
+ },
+ {
+  "text": "are any of the background checks running late",
+  "expect": "slow_checks"
+ },
+ {
+  "text": "who is at risk of not showing up on day one",
+  "expect": "day_one_risk"
+ },
+ {
+  "text": "how do we know somebody opened the confirmation",
+  "expect": "confirm_signal"
+ },
+ {
+  "text": "what goes on at step 12",
+  "expect": "explain_stage"
+ },
+ {
+  "text": "whos responsible for stage 6",
+  "expect": "explain_stage"
+ },
+ {
+  "text": "show me the ones we held back",
+  "expect": "review_held"
+ },
+ {
+  "text": "hows alicia doing",
+  "expect": "candidate_status"
+ },
+ {
+  "text": "where has alicia reyes got to",
+  "expect": "candidate_status"
+ },
+ {
+  "text": "how long is our time to hire",
+  "expect": "report_metric"
+ },
+ {
+  "text": "how many hires this month",
+  "expect": "report_metric"
+ },
+ {
+  "text": "take me to the pipeline",
+  "expect": "nav_goto"
+ },
+ {
+  "text": "bring up the compliance screen",
+  "expect": "nav_goto"
+ },
+ {
+  "text": "reset everything",
+  "expect": "reset_demo"
+ },
+ {
+  "text": "back to the start",
+  "expect": "reset_demo"
+ },
+ {
+  "text": "go dark",
+  "expect": "set_theme"
+ },
+ {
+  "text": "turn on light mode",
+  "expect": "set_theme"
+ },
+ {
+  "text": "what things can you do",
+  "expect": "help"
+ },
+ {
+  "text": "how does this work",
+  "expect": "help"
+ }
+]

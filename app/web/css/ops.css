@@ -1,0 +1,594 @@
+/* ============================================================================
+   ops.css  ·  operator CONTENT components
+
+   THE SHELL IS NOT HERE. shell.css owns the frame: the rail, the topbar, the
+   page header, the metrics strip, the queue table and the responsive
+   behaviour. This file owns what goes inside it: rows, the case drawer, the
+   person timeline, bands and empty states.
+
+   That split was not cosmetic. Both files declared `.ops`, ops.css loaded
+   second, and its `display: flex` quietly beat the shell's grid, so the
+   navigation rail rendered as a full width block across the top of the page. A
+   layout owned by two files is a layout owned by whichever one loads last.
+   ============================================================================ */
+
+/* ============================================================================
+   ops.css  ·  the operator surface, and it is a phone first
+
+   ONE SURFACE, THREE MODES, ONE DRAWER. The old specification had ten pages.
+   The flow review dismantled it with counts off the live data, so what is
+   styled here is a queue, a person and an argument, and nothing else.
+
+   WHY THE PHONE IS THE REFERENCE AND NOT AN AFTERTHOUGHT. The specification
+   mentions mobile zero times in 2,065 lines. Its user is a store manager with
+   ninety seconds between two interruptions and a phone in an apron pocket. So
+   every rule below is written at 390 by 844 and then allowed to grow, and the
+   growth is a container query on the content so it also holds when a panel
+   opens beside it.
+
+   THE ROW HEIGHT DEPARTS FROM --row-h ON PURPOSE. app.css targets 38px so
+   twenty funnel rows fit one view, and that is right for the funnel, which is
+   read rather than touched. A queue row is TOUCHED. Apple and Google both put
+   the minimum comfortable target at 44px and a 38px row with a control inside
+   it is under that before padding. So --ops-row is 56px on a phone and the
+   38px density comes back for the funnel table in Show, where nothing is
+   tapped. Two densities, each with a reason, rather than one density applied
+   where it does not fit.
+
+   ZERO RAW HEX. U-104. Every colour here is a token from tokens.css. The cost
+   tones reuse --crit, --warn and --muted, and a cost NEVER travels as colour
+   alone: the row prints the cost in words next to the colour, because the five
+   costs have to survive greyscale, print and any colour vision.
+
+   ELEVATION. U-103. There is no box-shadow in this file. The drawer's shadow
+   is app.css's and the tab bar, the header and every band separate with
+   --line and a --surface-2 step, which is what the rest of the build does.
+   ============================================================================ */
+
+/* --------------------------------------------------------------- the frame ---
+
+   THE LENGTHS SIT ON :root, NOT ON .ops, AND THAT IS A BUG FIX.
+
+   They were declared on `.ops` first, which is wrong for a reason that is
+   invisible in the source and obvious on screen. The drawer, the scrim, the
+   sheet and the batch bar are appended to `document.body`, OUTSIDE `.ops`,
+   because a fixed overlay inside a scrolling column inherits that column's
+   containing block. A custom property that is not in scope makes the whole
+   declaration invalid at computed-value time, so `bottom: var(--ops-tabs)` on
+   the batch bar became `bottom: auto` and it rendered at y=1561 on an 844px
+   screen: present in the DOM, correct text, invisible to a person. Measured,
+   not reasoned about. That token is gone with the phone tab bar it measured,
+   and the remaining three are read by this file only.
+
+   The same silence had unset every 44px minimum inside the drawer, so the
+   reason chips a manager taps with a thumb had no minimum height at all.
+
+   These are lengths, not colours. tokens.css owns the colour system and the
+   one shared density; these two are specific to this surface, and this file
+   is the only thing that reads them.
+   ------------------------------------------------------------------------- */
+
+:root {
+  /* A queue row is a tap target, not a table row. See the file header. */
+  --ops-row: 56px;
+  --ops-tap: 44px;
+  /* --ops-top and --ops-tabs were here. Both measured the phone chrome the
+     navigation rail replaced, and nothing has read either since. */
+}
+
+/* Every control in the header is a real target. A 26px icon button in a back
+   office with cold hands is a control that gets pressed twice. */
+.ops-ico[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); border-color: var(--accent-line); }
+
+/* ----------------------------------------------------------------- bands ---
+   A band is a titled list. It is a border and a background step, never a card
+   in a grid of equal cards, because the queue and the platform's own work list
+   are not the same size and must not pretend to be.
+   ------------------------------------------------------------------------- */
+
+.band { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg);
+        margin-bottom: var(--s3); overflow: hidden; }
+.band-hd {
+  display: flex; align-items: center; gap: var(--s2);
+  min-height: var(--ops-tap);
+  padding: var(--s2) var(--s3);
+  border-bottom: 1px solid var(--line);
+  background: var(--surface-2);
+}
+.band-hd h2 { font-size: var(--t-h3); letter-spacing: var(--t-h3-ls); margin-right: auto; }
+.band-hd .n { font-family: var(--mono); font-size: var(--t-small); color: var(--faint); }
+.band-bd { padding: var(--s3); }
+.band-bd.flush { padding: 0; }
+button.band-hd { width: 100%; border-left: 0; border-right: 0; border-top: 0; text-align: left;
+                 font: inherit; color: inherit; cursor: pointer; }
+button.band-hd:hover { background: var(--line-soft); }
+
+.band-note { color: var(--muted); font-size: var(--t-small); padding: var(--s2) var(--s3) var(--s3); }
+
+/* ------------------------------------------------------------ the queue row ---
+   NAME, VERB, WHAT IT COSTS AND WHEN. Four things, one shape, whatever
+   produced the row. A state name is never the primary text: "Screening in
+   progress" tells a manager nothing and "Interview them, they applied 4 days
+   ago" tells them everything.
+   ------------------------------------------------------------------------- */
+
+.rows { display: flex; flex-direction: column; }
+
+.row {
+  display: flex; align-items: flex-start; gap: var(--s3);
+  width: 100%; min-height: var(--ops-row);
+  padding: var(--s2) var(--s3);
+  border: 0; border-bottom: 1px solid var(--line-soft);
+  border-left: 3px solid transparent;
+  background: transparent; color: inherit; font: inherit;
+  text-align: left; cursor: pointer;
+  transition: background var(--resp-fast) var(--ease-ui);
+}
+.row:last-child { border-bottom: 0; }
+.row:hover { background: var(--surface-2); }
+
+.row-disc {
+  flex: 0 0 34px; width: 34px; height: 34px; margin-top: 2px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--accent-line);
+  background: var(--accent-soft); color: var(--accent);
+  font-size: var(--t-small); font-weight: var(--w-bold);
+  font-variant-numeric: normal; letter-spacing: 0;
+}
+.row-mid { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.row-name { font-weight: var(--w-strong); font-size: var(--t-body); }
+.row-verb { color: var(--ink); font-size: var(--t-small); line-height: 1.4; }
+
+/* A checkbox replaces the initials while a batch is being built, so the row
+   does not grow a second control it only needs some of the time. */
+.row-box {
+  flex: 0 0 34px; width: 34px; height: 34px; margin-top: 2px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid var(--line); border-radius: var(--r-md);
+  background: var(--surface); color: var(--accent);
+}
+.row-box.on { border-color: var(--accent); background: var(--accent-soft); }
+.row-box svg { width: 18px; height: 18px; display: block; }
+
+/* The batch bar, pinned to the foot of the window so the count is never
+   scrolled away from the thing it counts. It used to sit above the phone tab
+   bar, which no longer exists: the rail replaced it. */
+.batch {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 21;
+  display: flex; align-items: center; gap: var(--s3);
+  padding: var(--s2) var(--s3);
+  border-top: 1px solid var(--accent-line);
+  background: var(--accent-soft);
+  padding-bottom: calc(var(--s2) + env(safe-area-inset-bottom, 0));
+}
+.batch .t { flex: 1 1 auto; min-width: 0; color: var(--accent); font-weight: var(--w-strong); }
+.batch .btn { min-height: var(--ops-tap); }
+
+/* -------------------------------------------------------- waiting on us ---
+   The honest half. A manager waiting on a signature is waiting on us, and
+   nothing in the old ten surfaces had a home for that.
+   ------------------------------------------------------------------------- */
+
+.owe { display: flex; align-items: flex-start; gap: var(--s3);
+       padding: var(--s2) var(--s3); border-bottom: 1px solid var(--line-soft); }
+.owe:last-child { border-bottom: 0; }
+.owe-mid { flex: 1 1 auto; min-width: 0; }
+.owe-name { font-weight: var(--w-medium); font-size: var(--t-small); }
+.owe-what { color: var(--muted); font-size: var(--t-small); }
+.owe-blocks { color: var(--warn); font-size: var(--t-micro); letter-spacing: var(--t-micro-ls); font-weight: var(--w-medium); }
+.owe-age { color: var(--faint); font-size: var(--t-micro); letter-spacing: var(--t-micro-ls);
+           font-family: var(--mono); white-space: nowrap; }
+
+/* ------------------------------------------------------------------ done ---
+   What this visit changed, built from the write responses rather than from a
+   guess. It is here because an approval moves somebody to "Offer ready to
+   send", which the queue does not carry, so without this band the loop the
+   manager just opened closes off screen.
+   ------------------------------------------------------------------------- */
+
+.did { display: flex; align-items: flex-start; gap: var(--s3);
+       padding: var(--s2) var(--s3); border-bottom: 1px solid var(--line-soft); }
+.did:last-child { border-bottom: 0; }
+.did-mid { flex: 1 1 auto; min-width: 0; }
+.did-name { font-weight: var(--w-medium); font-size: var(--t-small); }
+.did-what { color: var(--muted); font-size: var(--t-small); }
+
+/* --------------------------------------------------------------- person ---
+   The twenty step journey as the spine, on ONE shared time axis, so overlap is
+   visible. Solid is recorded work, hatched is waiting, and both come from
+   app.css so the encoding is the same one the funnel uses.
+   ------------------------------------------------------------------------- */
+
+.who { display: flex; align-items: flex-start; gap: var(--s3); margin-bottom: var(--s3); }
+.who-disc {
+  flex: 0 0 44px; width: 44px; height: 44px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--accent-line); background: var(--accent-soft); color: var(--accent);
+  font-weight: var(--w-bold); font-variant-numeric: normal;
+}
+.who-mid { min-width: 0; flex: 1 1 auto; }
+/* It is an h1 now, and it is this page's subject, so it carries the same
+   weight the h1 on every other operator page does. */
+.who-name { font-size: var(--t-h1); letter-spacing: var(--t-h1-ls);
+            font-weight: var(--w-heavy); line-height: 1.15; }
+.who-sub { color: var(--muted); font-size: var(--t-small); }
+
+.chiprow { display: flex; flex-wrap: wrap; gap: var(--s2); align-items: center; }
+.chiprow + .chiprow { margin-top: var(--s2); }
+
+.spine { display: flex; flex-direction: column; }
+.spine-cap { color: var(--faint); font-size: var(--t-micro); letter-spacing: var(--t-micro-ls);
+             padding: var(--s2) var(--s3); border-bottom: 1px solid var(--line-soft); }
+.step {
+  display: grid;
+  /* Deliberately NOT equal columns. A step number is two characters, a name is
+     a phrase and a bar is whatever is left. U-105. */
+  grid-template-columns: 22px minmax(0, 1fr);
+  gap: 0 var(--s2);
+  align-items: start;
+  padding: var(--s2) var(--s3);
+  border-bottom: 1px solid var(--line-soft);
+}
+.step:last-child { border-bottom: 0; }
+.step.is-now { background: var(--accent-soft); }
+.step-n { color: var(--faint); font-family: var(--mono); font-size: var(--t-micro); padding-top: 2px; }
+.step-b { min-width: 0; }
+/* WRAPS RATHER THAN TRUNCATES. A step's name is one of twenty fixed strings
+   and every one of them is short; ellipsising "Application captured" to
+   "Application captu…" to make room for a chip beside it loses the only words
+   in the row that say what the step is. */
+.step-name { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s1) var(--s2);
+             font-size: var(--t-small); font-weight: var(--w-medium); }
+.step-name .t { min-width: 0; }
+.step-sub { color: var(--faint); font-size: var(--t-micro); letter-spacing: var(--t-micro-ls); margin-top: 1px; }
+.step-track { position: relative; height: 12px; margin-top: var(--s1);
+              background: var(--surface-2); border-radius: 2px; overflow: hidden; }
+.step-track .bar { height: 100%; top: 0; }
+.axis { display: flex; justify-content: space-between; color: var(--faint);
+        font-size: var(--t-micro); letter-spacing: var(--t-micro-ls);
+        padding: var(--s2) var(--s3); border-bottom: 1px solid var(--line-soft); }
+
+.legend { display: flex; flex-wrap: wrap; gap: var(--s3); align-items: center;
+          padding: var(--s2) var(--s3); color: var(--muted);
+          font-size: var(--t-micro); letter-spacing: var(--t-micro-ls); }
+.legend .k { display: inline-flex; align-items: center; gap: var(--s1); }
+.legend .sw { width: 18px; height: 10px; border-radius: 2px; display: inline-block; }
+.legend .sw.work { background: var(--system); }
+.legend .sw.hatch {
+  background:
+    repeating-linear-gradient(var(--hatch-angle), var(--hatch-ink) 0, var(--hatch-ink) 1px,
+                              transparent 1px, transparent var(--hatch-pitch)),
+    var(--system-soft);
+  border: 1px solid var(--system-line);
+}
+
+/* The audit trail, contiguous, at the foot. Who did what and why, and the why
+   is never dropped: where the record holds none, it says so. */
+.aud { display: flex; flex-direction: column; }
+.aud-e { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 0 var(--s2);
+         padding: var(--s2) var(--s3); border-bottom: 1px solid var(--line-soft); }
+.aud-e:last-child { border-bottom: 0; }
+.aud-at { color: var(--faint); font-family: var(--mono); font-size: var(--t-micro); }
+.aud-act { font-size: var(--t-small); font-weight: var(--w-medium); display: flex; align-items: center; gap: var(--s2); }
+.aud-why { color: var(--muted); font-size: var(--t-small); }
+.aud-why.none { color: var(--faint); font-style: italic; }
+
+/* ----------------------------------------------------------------- show ---
+   The argument. Duration-shaped, so the bar length is the wait and the eye
+   reads the distribution rather than a count of people.
+   ------------------------------------------------------------------------- */
+
+.fun { display: flex; flex-direction: column; }
+.fun-r { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 0 var(--s2);
+         min-height: var(--row-h); padding: var(--s1) var(--s3);
+         border-bottom: 1px solid var(--line-soft); align-items: center; }
+.fun-r:last-child { border-bottom: 0; }
+.fun-r.is-worst { background: var(--crit-soft); }
+.fun-b { min-width: 0; }
+.fun-top { display: flex; align-items: baseline; gap: var(--s2); }
+.fun-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+            font-size: var(--t-small); }
+.fun-num { margin-left: auto; font-family: var(--mono); font-size: var(--t-micro); white-space: nowrap; color: var(--muted); }
+.fun-track { position: relative; height: 10px; margin-top: 2px; background: var(--surface-2);
+             border-radius: 2px; overflow: hidden; }
+.fun-track .bar { height: 100%; top: 0; }
+.fun-none { color: var(--faint); font-size: var(--t-micro); letter-spacing: var(--t-micro-ls); }
+
+.stage { padding: var(--s2) var(--s3); background: var(--surface-2);
+         border-bottom: 1px solid var(--line); color: var(--faint);
+         font-size: var(--t-micro); letter-spacing: var(--t-micro-ls);
+         text-transform: uppercase; font-weight: var(--w-medium); }
+
+.kv { display: flex; flex-wrap: wrap; gap: var(--s1) var(--s3); align-items: baseline; }
+.kv > .k { color: var(--faint); font-size: var(--t-micro); letter-spacing: var(--t-micro-ls); text-transform: uppercase; }
+.kv > .v { font-family: var(--mono); font-size: var(--t-small); }
+
+.def { display: flex; flex-direction: column; gap: var(--s2); }
+.def-r { border-bottom: 1px solid var(--line-soft); padding-bottom: var(--s2); }
+.def-r:last-child { border-bottom: 0; padding-bottom: 0; }
+.def-t { font-weight: var(--w-medium); font-size: var(--t-small); display: flex; flex-wrap: wrap;
+         align-items: center; gap: var(--s2); }
+.def-d { color: var(--muted); font-size: var(--t-small); margin-top: 1px; }
+
+/* ---------------------------------------------------------------- search --- */
+
+.search-f { display: flex; gap: var(--s2); margin-bottom: var(--s3); }
+.search-f input { min-height: var(--ops-tap); }
+.hit { display: flex; align-items: center; gap: var(--s3); width: 100%;
+       min-height: var(--ops-row); padding: var(--s2) var(--s3);
+       border: 0; border-bottom: 1px solid var(--line-soft); background: transparent;
+       color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.hit:last-child { border-bottom: 0; }
+.hit:hover { background: var(--surface-2); }
+/* A STACK, NOT TWO INLINE SPANS. `.hit-mid` held two spans with no rule on
+   them, so every search result, compliance case and screening row rendered as
+   "Devon WhitakerStep 3 of 20, here since Sun 16 Aug" with no break and no
+   space. Seventeen rows in three surfaces, all reading as one run of text. */
+.hit-mid { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; line-height: 1.35; }
+.hit-name { font-weight: var(--w-strong); font-size: var(--t-body); }
+.hit-sub { color: var(--muted); font-size: var(--t-small);
+           overflow: hidden; text-overflow: ellipsis; }
+
+/* ---------------------------------------------------------------- drawer ---
+   ONE implementation, one fixed frame, opened by every row. The base is
+   app.css's .drawer. What changes here is the direction it comes from on a
+   phone: a bottom sheet, because the actions live at its foot and the foot of
+   a bottom sheet is where a thumb already is. A right-hand panel on a 390px
+   screen puts the confirm button at the top of the reach arc.
+   ------------------------------------------------------------------------- */
+
+/* ON A DESKTOP IT IS A RIGHT-HAND CASE PANEL, and on a phone it is a bottom
+   sheet. The bottom-sheet rule used to apply at every width, so an operations
+   console on a 1440 screen put the case two thirds of the way down the page
+   and hid the queue behind it. A manager comparing a row against its evidence
+   needs both on screen; a thumb needs the buttons at the bottom. Different
+   devices, different shape, one implementation. */
+.drawer { width: min(520px, 100vw); max-width: 100vw; }
+
+@media (max-width: 900px) {
+  .drawer { width: 100%; top: auto; height: 92dvh; border-left: 0;
+            border-top: 1px solid var(--line);
+            border-radius: var(--r-lg) var(--r-lg) 0 0;
+            transform: translateY(100%); }
+  .drawer.open { transform: none; }
+}
+
+/* ---------------------------------------------------------- drawer header ---
+   Who, what role, which store, and where they are in the twenty steps. The
+   review's complaint was that the drawer opened with the same visual weight
+   everywhere, so there was no answer to "who am I looking at".
+   ------------------------------------------------------------------------- */
+
+.dr-id { padding: var(--s4) var(--card-pad) var(--s3); border-bottom: 1px solid var(--line); }
+.dr-id-top { display: flex; align-items: flex-start; gap: var(--s3); }
+.dr-id .av {
+  width: 38px; height: 38px; flex: 0 0 38px; border-radius: 50%;
+  background: var(--accent-soft); color: var(--accent);
+  display: grid; place-items: center;
+  font-weight: var(--w-bold); font-size: var(--t-small);
+}
+.dr-id h2 { font-size: var(--t-h2); letter-spacing: var(--t-h2-ls); font-weight: var(--w-heavy); }
+.dr-id .sub { color: var(--muted); font-size: var(--t-small); }
+.dr-id .step { display: flex; align-items: center; gap: var(--s2); margin-top: var(--s2); }
+.dr-id .step .n { font-family: var(--mono); font-size: var(--t-micro); color: var(--faint); }
+
+/* THE TABS. The current one is unmistakable: a filled label and a rule under
+   it, not a slightly different grey. */
+.dr-tabs { display: flex; gap: var(--s1); padding: 0 var(--card-pad);
+           border-bottom: 1px solid var(--line); background: var(--surface); }
+.dr-tab {
+  border: 0; background: none; font: inherit; cursor: pointer;
+  padding: var(--s2) var(--s2) var(--s3);
+  color: var(--faint); font-weight: var(--w-medium); font-size: var(--t-small);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+.dr-tab:hover { color: var(--ink); }
+.dr-tab[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent);
+                                font-weight: var(--w-strong); }
+.dr-tab .c { font-family: var(--mono); font-size: var(--t-micro); opacity: 0.7; margin-left: 4px; }
+
+/* A SECTION INSIDE THE DRAWER. An uppercase label, a rule, then the content.
+   The four Overview sections the brief names get this treatment so the eye can
+   find WHY THIS IS HERE without reading the whole panel. */
+.dr-sec { padding: var(--s4) var(--card-pad); border-bottom: 1px solid var(--line-soft); }
+.dr-sec:last-child { border-bottom: 0; }
+.dr-sec > .lab {
+  color: var(--faint); font-size: var(--t-micro); letter-spacing: var(--t-micro-ls);
+  text-transform: uppercase; font-weight: var(--w-bold);
+  margin-bottom: var(--s2);
+}
+.dr-sec.is-act { background: var(--accent-soft); border-bottom: 0; }
+.dr-sec.is-act > .lab { color: var(--accent); }
+
+/* EVIDENCE, AS ITEMS RATHER THAN A WALL. The review's specific complaint. Each
+   piece keeps its own title, its source, its date and its citation, so nothing
+   is hidden to make the panel tidier: traceability is the product. */
+/* ---------------------------------------------------------- the timeline ---
+   A real spine with a dot per entry, the owner hue on the dot, and the reason
+   somebody typed under the move it belongs to. It is an ordered list, so a
+   screen reader counts it without an aria attribute doing it by hand.
+   ------------------------------------------------------------------------- */
+
+.dr-tl { list-style: none; margin: 0; padding: 0 0 0 var(--s1); }
+.dr-tl-i { position: relative; display: flex; gap: var(--s3); padding: 0 0 var(--s4); }
+.dr-tl-i:last-child { padding-bottom: 0; }
+/* The spine, drawn from the dot down to the next one, so the last entry has no
+   line hanging off it. */
+.dr-tl-i::before {
+  content: ''; position: absolute; left: 5px; top: 15px; bottom: 0;
+  width: 1px; background: var(--line);
+}
+.dr-tl-i:last-child::before { display: none; }
+/* A BORDER, NOT A SHADOW. The dot has to knock the spine out behind it, and a
+   2px ring of --surface does that exactly. Reaching for box-shadow here was
+   decoration wearing the clothes of elevation, and the lint caught it. */
+.dr-tl-i .dot {
+  position: relative; z-index: 1;
+  flex: 0 0 11px; width: 11px; height: 11px; margin-top: 4px;
+  border-radius: 50%;
+  border: 2px solid var(--surface);
+  background: var(--owner, var(--system));
+  background-clip: padding-box;
+}
+.dr-tl-i .b { min-width: 0; }
+.dr-tl-i .t { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--s2);
+              font-weight: var(--w-strong); font-size: var(--t-small); }
+.dr-tl-i .t .st { font-family: var(--mono); font-size: var(--t-micro); color: var(--faint); }
+.dr-tl-i .m { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s1) var(--s2);
+              color: var(--muted); font-size: var(--t-micro); margin-top: 2px; }
+/* An entry continuing a run of the same state has no heading of its own, so
+   its dot is smaller and its first line is the actor. Same event, less shout. */
+.dr-tl-i.rep .dot { width: 7px; height: 7px; flex-basis: 7px; margin-top: 6px; }
+.dr-tl-i.rep .m { margin-top: 0; }
+.dr-tl-i .m .at { font-family: var(--mono); color: var(--faint); }
+.dr-tl-i .why { color: var(--ink); font-size: var(--t-small); line-height: 1.5; margin-top: var(--s1); }
+
+/* `.dr-ev` and `.dr-ev-item` were here. They styled the old Timeline, which
+   was rendering the list of moves still AVAILABLE as though it were history;
+   see `timelineBody` in ops/drawer.js for what that printed. The replacement is
+   `.dr-tl` above, and the evidence blocks have always used `.ev*`. */
+.drawer-hd { min-height: var(--ops-tap); gap: var(--s2); }
+.drawer-hd .x { margin-left: auto; }
+.drawer-ft { flex-wrap: wrap; padding-bottom: calc(var(--s3) + env(safe-area-inset-bottom, 0)); }
+.drawer-ft .btn { min-height: var(--ops-tap); flex: 1 1 auto; }
+
+/* THE CLOSED SCRIM MUST NOT EAT THE PAGE.
+
+   app.css draws `.scrim` as `position: fixed; inset: 0` and fades it with
+   opacity alone, so a CLOSED scrim is a transparent sheet over the entire
+   viewport that still receives every click. Once the first drawer had been
+   opened and closed, nothing on the queue could be tapped again. Playwright
+   found it in one sentence: `<div class="scrim"></div> intercepts pointer
+   events`. On a phone it would have read as the product freezing.
+
+   Opacity hides a thing from the eye. pointer-events is what hides it from a
+   finger, and both are needed. */
+.scrim { pointer-events: none; }
+.scrim.open { pointer-events: auto; }
+
+/* The grab handle. It says the sheet is draggable-shaped and dismissible
+   without a word, and it is the affordance a phone user already knows. */
+.drawer-grab { display: block; width: 36px; height: 4px; border-radius: var(--r-pill);
+               background: var(--line); margin: var(--s2) auto 0; }
+
+/* THE FIXED FRAME. Five blocks in this order, every time, whatever kind of row
+   opened it. Only the evidence block changes. That is one frame rather than
+   fourteen components. */
+.dsec { margin-bottom: var(--s4); }
+.dsec > .h { color: var(--faint); font-size: var(--t-micro); letter-spacing: var(--t-micro-ls);
+             text-transform: uppercase; font-weight: var(--w-medium); margin-bottom: var(--s2); }
+.dsec > .h .of { text-transform: none; letter-spacing: 0; font-weight: var(--w-normal); }
+
+.ev { border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface-2);
+      padding: var(--s3); margin-bottom: var(--s2); }
+.ev:last-child { margin-bottom: 0; }
+.ev-t { font-weight: var(--w-medium); font-size: var(--t-small); display: flex; flex-wrap: wrap;
+        align-items: center; gap: var(--s2); }
+.ev-d { color: var(--muted); font-size: var(--t-small); margin-top: var(--s1); }
+.ev-q { border-left: 2px solid var(--agent-line); padding-left: var(--s2); color: var(--ink);
+        font-size: var(--t-small); margin-top: var(--s1); }
+.ev-cite { color: var(--faint); font-size: var(--t-micro); letter-spacing: var(--t-micro-ls); margin-top: var(--s1); }
+
+/* Reason chips. CHIPS FIRST, TYPING AS THE FALLBACK, because nineteen of
+   twenty-one seeded decisions carry the identical reason string, which is what
+   a required free-text box buys at 7pm on a Friday. */
+.rchips { display: flex; flex-wrap: wrap; gap: var(--s2); margin-bottom: var(--s2); }
+.rchip {
+  min-height: var(--ops-tap);
+  padding: var(--s2) var(--s3);
+  border: 1px solid var(--line); border-radius: var(--r-pill);
+  background: var(--surface); color: var(--muted);
+  font: inherit; font-size: var(--t-small); text-align: left; cursor: pointer;
+}
+.rchip:hover { background: var(--surface-2); color: var(--ink); }
+.rchip[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); font-weight: var(--w-medium); }
+.rreq { color: var(--crit); font-size: var(--t-micro); letter-spacing: var(--t-micro-ls); font-weight: var(--w-medium); }
+.rkept { color: var(--faint); font-size: var(--t-micro); letter-spacing: var(--t-micro-ls); }
+
+/* A refusal is the best copy in the product. It is rendered verbatim and it is
+   never replaced with a friendlier sentence of our own. */
+.refuse { border: 1px solid var(--crit-line); border-left-width: 3px; border-radius: var(--r-md);
+          background: var(--crit-soft); padding: var(--s3); margin-bottom: var(--s3); }
+.refuse-t { color: var(--crit); font-weight: var(--w-strong); font-size: var(--t-small); }
+.refuse-d { color: var(--ink); font-size: var(--t-small); margin-top: var(--s1); }
+.done-ok { border: 1px solid var(--good-line); border-left-width: 3px; border-radius: var(--r-md);
+           background: var(--good-soft); padding: var(--s3); margin-bottom: var(--s3); }
+.done-ok .t { color: var(--good); font-weight: var(--w-strong); font-size: var(--t-small); }
+.done-ok .d { color: var(--ink); font-size: var(--t-small); margin-top: var(--s1); }
+
+/* The names in a batch confirmation SCROLL and never clamp. U-82. The names
+   are the safety property: a batch that says "and 2 others" is a batch nobody
+   checked. */
+.names { max-height: 176px; overflow-y: auto; border: 1px solid var(--line);
+         border-radius: var(--r-md); background: var(--surface); }
+.names .n { display: flex; align-items: center; gap: var(--s2); padding: var(--s2) var(--s3);
+            border-bottom: 1px solid var(--line-soft); font-size: var(--t-small); }
+.names .n:last-child { border-bottom: 0; }
+.names .n .s { margin-left: auto; color: var(--faint); font-size: var(--t-micro);
+               letter-spacing: var(--t-micro-ls); }
+
+/* --------------------------------------------------------------- growth ---
+   Keyed to the content container so the surface also holds when something
+   opens beside it, which is U-108's payoff and the reason there are no
+   viewport breakpoints for content here.
+   ------------------------------------------------------------------------- */
+
+@container pane (min-width: 40rem) {
+  /* Rows can come in once there is room, because a mouse does not need 56px.
+     Still above the 44px target: the pointer is not the only input at this
+     width, a tablet lands here too. */
+  .row { min-height: 48px; align-items: center; }
+  .row-mid { flex-direction: row; align-items: baseline; gap: var(--s3); }
+  .row-name { flex: 0 0 auto; min-width: 11rem; }
+  .row-verb { flex: 1 1 auto; }
+  .aud-e { grid-template-columns: 132px minmax(0, 1fr); }
+  /* 18rem, not 16. At 16 the longest step name ("Application captured") was
+     ellipsised while its "END INFERRED" chip wrapped onto a second line beside
+     it, on a 1440px screen with 700px of empty track to the right. */
+  .step { grid-template-columns: 28px 18rem minmax(0, 1fr); align-items: center; }
+  .step-b.name-col { grid-column: 2; }
+  .step-b.bar-col { grid-column: 3; }
+  .fun-r { grid-template-columns: 28px 18rem minmax(0, 1fr); }
+  .fun-b.name-col { grid-column: 2; }
+  .fun-b.bar-col { grid-column: 3; }
+}
+
+@media (min-width: 48rem) {
+  .drawer { width: min(520px, 100vw); max-width: 520px; left: auto; top: 0; height: auto;
+            border-radius: 0; border-left: 1px solid var(--line); border-top: 0;
+            transform: translateX(100%); }
+  .drawer.open { transform: none; }
+  .drawer-grab { display: none; }
+  .drawer-ft .btn { flex: 0 0 auto; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drawer { transition: none; }
+}
+
+/* THE DEMONSTRATION MARKER. One quiet line, not a dashed box. It rendered as a
+   full width dashed rectangle with text inside, which at a glance read as an
+   empty input field somebody had failed to fill in. It has to stay visible and
+   it does not have to shout. */
+.ops-marker { margin-bottom: var(--s3); }
+.ops-marker .sim-note {
+  display: inline-flex; align-items: center; gap: var(--s2);
+  border: 0; border-left: 2px solid var(--line);
+  border-radius: 0; background: none;
+  padding: 0 0 0 var(--s2);
+  color: var(--faint); font-size: var(--t-small);
+  cursor: pointer; text-align: left;
+}
+.ops-marker .sim-note:hover { color: var(--muted); }
+.ops-marker .sim-note.full { display: block; max-width: 78ch; line-height: 1.5; }
+
+/* The drawer header bar. A kicker and the name, small, because the identity
+   block below owns the real heading. On a phone the identity block scrolls
+   away, so the name here is what stays. */
+.dr-kicker { color: var(--faint); font-size: var(--t-micro); letter-spacing: var(--t-micro-ls);
+             text-transform: uppercase; font-weight: var(--w-bold); }
+.dr-hd-name { font-weight: var(--w-strong); font-size: var(--t-small); }
+@media (min-width: 901px) { .dr-hd-name { display: none; } }

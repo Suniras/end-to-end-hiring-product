@@ -1,0 +1,534 @@
+[
+ {
+  "text": "hire alicia",
+  "expect": "approve_candidate"
+ },
+ {
+  "text": "approve alicia reyes",
+  "expect": "approve_candidate"
+ },
+ {
+  "text": "lets go ahead with alicia",
+  "expect": "approve_candidate"
+ },
+ {
+  "text": "give ines the job",
+  "expect": "approve_candidate"
+ },
+ {
+  "text": "move marcus hale forward",
+  "expect": "approve_candidate"
+ },
+ {
+  "text": "yes to ines duarte",
+  "expect": "approve_candidate"
+ },
+ {
+  "text": "aprove alica",
+  "expect": "approve_candidate"
+ },
+ {
+  "text": "can you hire alicia reyes",
+  "expect": "approve_candidate"
+ },
+ {
+  "text": "reject ryan",
+  "expect": "reject_candidate"
+ },
+ {
+  "text": "turn down ryan kettle",
+  "expect": "reject_candidate"
+ },
+ {
+  "text": "pass on ryan",
+  "expect": "reject_candidate"
+ },
+ {
+  "text": "decline ryan kettle",
+  "expect": "reject_candidate"
+ },
+ {
+  "text": "approve everyone above 75",
+  "expect": "approve_batch"
+ },
+ {
+  "text": "hire all the unflagged ones",
+  "expect": "approve_batch"
+ },
+ {
+  "text": "approve every candidate over 80",
+  "expect": "approve_batch"
+ },
+ {
+  "text": "bulk approve the clear ones",
+  "expect": "approve_batch"
+ },
+ {
+  "text": "take kayla off the rota",
+  "expect": "remove_shift"
+ },
+ {
+  "text": "remove kayla brennan-ross shifts",
+  "expect": "remove_shift"
+ },
+ {
+  "text": "drop kayla from next week",
+  "expect": "remove_shift"
+ },
+ {
+  "text": "cancel her shifts",
+  "expect": "remove_shift"
+ },
+ {
+  "text": "pull kayla off the schedule",
+  "expect": "remove_shift"
+ },
+ {
+  "text": "what needs a person",
+  "expect": "queue_summary"
+ },
+ {
+  "text": "what is in my queue",
+  "expect": "queue_summary"
+ },
+ {
+  "text": "what is waiting on me",
+  "expect": "queue_summary"
+ },
+ {
+  "text": "anything for me today",
+  "expect": "queue_summary"
+ },
+ {
+  "text": "show my inbox",
+  "expect": "queue_summary"
+ },
+ {
+  "text": "what should i do first",
+  "expect": "queue_summary"
+ },
+ {
+  "text": "why is trevor blocked",
+  "expect": "explain_flag"
+ },
+ {
+  "text": "what is wrong with trevor boone",
+  "expect": "explain_flag"
+ },
+ {
+  "text": "explain the rehire flag",
+  "expect": "explain_flag"
+ },
+ {
+  "text": "why did trevor stop",
+  "expect": "explain_flag"
+ },
+ {
+  "text": "who is flagged",
+  "expect": "explain_flag"
+ },
+ {
+  "text": "what is happening with kayla",
+  "expect": "compliance_status"
+ },
+ {
+  "text": "everify status",
+  "expect": "compliance_status"
+ },
+ {
+  "text": "how long left on the mismatch",
+  "expect": "compliance_status"
+ },
+ {
+  "text": "when does the i9 expire",
+  "expect": "compliance_status"
+ },
+ {
+  "text": "compliance deadlines",
+  "expect": "compliance_status"
+ },
+ {
+  "text": "is kayla clear yet",
+  "expect": "compliance_status"
+ },
+ {
+  "text": "which background checks are slow",
+  "expect": "slow_checks"
+ },
+ {
+  "text": "what is holding up the checks",
+  "expect": "slow_checks"
+ },
+ {
+  "text": "any checks overdue",
+  "expect": "slow_checks"
+ },
+ {
+  "text": "why is sasha taking so long",
+  "expect": "slow_checks"
+ },
+ {
+  "text": "background check status",
+  "expect": "slow_checks"
+ },
+ {
+  "text": "who might not turn up",
+  "expect": "day_one_risk"
+ },
+ {
+  "text": "any day one risk",
+  "expect": "day_one_risk"
+ },
+ {
+  "text": "who has not confirmed",
+  "expect": "day_one_risk"
+ },
+ {
+  "text": "who is starting soon",
+  "expect": "day_one_risk"
+ },
+ {
+  "text": "first shifts this week",
+  "expect": "day_one_risk"
+ },
+ {
+  "text": "anyone likely to no show",
+  "expect": "day_one_risk"
+ },
+ {
+  "text": "how do you know the confirmation was opened",
+  "expect": "confirm_signal"
+ },
+ {
+  "text": "how do you track confirmations",
+  "expect": "confirm_signal"
+ },
+ {
+  "text": "how does the confirmation signal work",
+  "expect": "confirm_signal"
+ },
+ {
+  "text": "how can you tell if they read it",
+  "expect": "confirm_signal"
+ },
+ {
+  "text": "what happens at stage 12",
+  "expect": "explain_stage"
+ },
+ {
+  "text": "who owns step 6",
+  "expect": "explain_stage"
+ },
+ {
+  "text": "explain stage 3",
+  "expect": "explain_stage"
+ },
+ {
+  "text": "tell me about stage 10",
+  "expect": "explain_stage"
+ },
+ {
+  "text": "what is step 16",
+  "expect": "explain_stage"
+ },
+ {
+  "text": "show the held candidates",
+  "expect": "review_held"
+ },
+ {
+  "text": "why were 19 held",
+  "expect": "review_held"
+ },
+ {
+  "text": "clear the review list",
+  "expect": "review_held"
+ },
+ {
+  "text": "mark the held ones read",
+  "expect": "review_held"
+ },
+ {
+  "text": "what is in review",
+  "expect": "review_held"
+ },
+ {
+  "text": "where is alicia",
+  "expect": "candidate_status"
+ },
+ {
+  "text": "status of alicia reyes",
+  "expect": "candidate_status"
+ },
+ {
+  "text": "how far along is alicia",
+  "expect": "candidate_status"
+ },
+ {
+  "text": "what stage is alicia at",
+  "expect": "candidate_status"
+ },
+ {
+  "text": "what is our time to hire",
+  "expect": "report_metric"
+ },
+ {
+  "text": "how many did we hire",
+  "expect": "report_metric"
+ },
+ {
+  "text": "show me the numbers",
+  "expect": "report_metric"
+ },
+ {
+  "text": "open reports",
+  "expect": "report_metric"
+ },
+ {
+  "text": "who acted the most",
+  "expect": "report_metric"
+ },
+ {
+  "text": "what is the drop off",
+  "expect": "report_metric"
+ },
+ {
+  "text": "open the pipeline",
+  "expect": "nav_goto"
+ },
+ {
+  "text": "show compliance",
+  "expect": "nav_goto"
+ },
+ {
+  "text": "take me to reports",
+  "expect": "nav_goto"
+ },
+ {
+  "text": "go to the store view",
+  "expect": "nav_goto"
+ },
+ {
+  "text": "show me the screening call",
+  "expect": "nav_goto"
+ },
+ {
+  "text": "reset the demo",
+  "expect": "reset_demo"
+ },
+ {
+  "text": "start over",
+  "expect": "reset_demo"
+ },
+ {
+  "text": "put it back how it was",
+  "expect": "reset_demo"
+ },
+ {
+  "text": "clean slate",
+  "expect": "reset_demo"
+ },
+ {
+  "text": "switch to dark mode",
+  "expect": "set_theme"
+ },
+ {
+  "text": "make it light",
+  "expect": "set_theme"
+ },
+ {
+  "text": "change the theme",
+  "expect": "set_theme"
+ },
+ {
+  "text": "dark please",
+  "expect": "set_theme"
+ },
+ {
+  "text": "send the offer to owen",
+  "expect": "send_offer"
+ },
+ {
+  "text": "send an offer to owen castellano",
+  "expect": "send_offer"
+ },
+ {
+  "text": "get the offer out to owen",
+  "expect": "send_offer"
+ },
+ {
+  "text": "send owen his offer",
+  "expect": "send_offer"
+ },
+ {
+  "text": "offer letter to owen castellano",
+  "expect": "send_offer"
+ },
+ {
+  "text": "start the background check for bianca",
+  "expect": "start_check"
+ },
+ {
+  "text": "order the check for bianca osei",
+  "expect": "start_check"
+ },
+ {
+  "text": "kick off the background check for bianca",
+  "expect": "start_check"
+ },
+ {
+  "text": "put the check in for bianca",
+  "expect": "start_check"
+ },
+ {
+  "text": "run the screening for alicia",
+  "expect": "run_screening"
+ },
+ {
+  "text": "start screening alicia reyes",
+  "expect": "run_screening"
+ },
+ {
+  "text": "screen everyone who is eligible",
+  "expect": "run_screening"
+ },
+ {
+  "text": "run screening for all eligible candidates",
+  "expect": "run_screening"
+ },
+ {
+  "text": "assign marisol to me",
+  "expect": "assign_candidate"
+ },
+ {
+  "text": "give marisol ferreira to me",
+  "expect": "assign_candidate"
+ },
+ {
+  "text": "put me on marisol",
+  "expect": "assign_candidate"
+ },
+ {
+  "text": "reassign marisol ferreira to me",
+  "expect": "assign_candidate"
+ },
+ {
+  "text": "show me candidates waiting more than 48 hours",
+  "expect": "waiting_long"
+ },
+ {
+  "text": "who has been waiting longest",
+  "expect": "waiting_long"
+ },
+ {
+  "text": "anyone waiting more than two days",
+  "expect": "waiting_long"
+ },
+ {
+  "text": "which candidates have been waiting the longest",
+  "expect": "waiting_long"
+ },
+ {
+  "text": "what is slowing down this store",
+  "expect": "store_bottleneck"
+ },
+ {
+  "text": "where is the time going",
+  "expect": "store_bottleneck"
+ },
+ {
+  "text": "what is our biggest bottleneck",
+  "expect": "store_bottleneck"
+ },
+ {
+  "text": "what is holding us up",
+  "expect": "store_bottleneck"
+ },
+ {
+  "text": "show me the timeline for alicia",
+  "expect": "candidate_timeline"
+ },
+ {
+  "text": "what happened to alicia reyes",
+  "expect": "candidate_timeline"
+ },
+ {
+  "text": "full history for alicia reyes",
+  "expect": "candidate_timeline"
+ },
+ {
+  "text": "show alicia reyes activity log",
+  "expect": "candidate_timeline"
+ },
+ {
+  "text": "show everyone waiting for my decision",
+  "expect": "pending_decisions"
+ },
+ {
+  "text": "who is waiting on me to decide",
+  "expect": "pending_decisions"
+ },
+ {
+  "text": "how many candidates are awaiting a decision",
+  "expect": "pending_decisions"
+ },
+ {
+  "text": "list everyone who needs my decision",
+  "expect": "pending_decisions"
+ },
+ {
+  "text": "which candidates are waiting for a decision",
+  "expect": "pending_decisions"
+ },
+ {
+  "text": "which candidates have completed screening",
+  "expect": "screening_done"
+ },
+ {
+  "text": "who has been screened",
+  "expect": "screening_done"
+ },
+ {
+  "text": "show me everyone who finished screening",
+  "expect": "screening_done"
+ },
+ {
+  "text": "how many candidates have been screened",
+  "expect": "screening_done"
+ },
+ {
+  "text": "what happened to the candidates from yesterday",
+  "expect": "recent_activity"
+ },
+ {
+  "text": "what moved overnight",
+  "expect": "recent_activity"
+ },
+ {
+  "text": "what changed since friday",
+  "expect": "recent_activity"
+ },
+ {
+  "text": "what happened over the weekend",
+  "expect": "recent_activity"
+ },
+ {
+  "text": "what can you do",
+  "expect": "help"
+ },
+ {
+  "text": "help",
+  "expect": "help"
+ },
+ {
+  "text": "what are you able to do",
+  "expect": "help"
+ },
+ {
+  "text": "list your commands",
+  "expect": "help"
+ },
+ {
+  "text": "how do i use this",
+  "expect": "help"
+ }
+]
